@@ -3,6 +3,14 @@
    state = { trucks:[], trailers:[], trip:{...}, settings:{...} }
 */
 const STORAGE_KEY = "towcalc_state_v1";
+function uuid(){
+  if (typeof crypto !== "undefined" && crypto.randomUUID) return uuid();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c=>{
+    const r = Math.random()*16|0, v = c==="x" ? r : (r&0x3|0x8);
+    return v.toString(16);
+  });
+}
+
 
 const defaults = () => ({
   settings: {
@@ -61,7 +69,7 @@ const defaults = () => ({
     truckId: "53ee3eac-d4e3-4913-b8f7-d62e548ff919",
     trailerId: "15c5550b-ee6c-4496-a82e-07fa3a8d86d7",
     presetId: "winter_boondock",
-    passengers: [{ id: crypto.randomUUID(), name: "Driver", weight: 180 }],
+    passengers: [{ id: uuid(), name: "Driver", weight: 180 }],
     truckCargo: 320,
     hitchHardware: 90,
     trailerCargo: 1200,
@@ -175,7 +183,7 @@ function hydrate(s){
   if(!s.trip.truckId && s.trucks[0]) s.trip.truckId = s.trucks[0].id;
   if(!s.trip.trailerId && s.trailers[0]) s.trip.trailerId = s.trailers[0].id;
   if(!Array.isArray(s.trip.passengers) || s.trip.passengers.length===0){
-    s.trip.passengers = [{ id: crypto.randomUUID(), name:"Driver", weight:180 }];
+    s.trip.passengers = [{ id: uuid(), name:"Driver", weight:180 }];
   }
   return s;
 }
@@ -487,7 +495,7 @@ function renderPassengers(){
     row.querySelector("button").onclick = ()=>{
       state.trip.passengers = state.trip.passengers.filter(x=>x.id!==p.id);
       if(state.trip.passengers.length===0){
-        state.trip.passengers = [{ id: crypto.randomUUID(), name:"Driver", weight:180 }];
+        state.trip.passengers = [{ id: uuid(), name:"Driver", weight:180 }];
       }
       saveState(); renderPassengers(); renderResults();
     };
@@ -534,7 +542,7 @@ function bindTrip(){
   bindNum("battEach","battEach");
 
   $("btnAddPassenger").onclick = ()=>{
-    state.trip.passengers.push({ id: crypto.randomUUID(), name:"Passenger", weight:160 });
+    state.trip.passengers.push({ id: uuid(), name:"Passenger", weight:160 });
     saveState(); renderPassengers(); renderResults();
   };
 }
@@ -548,7 +556,6 @@ function bindSettings(){
 }
 
 // ---------- Results + chart ----------
-let chart = null;
 
 function pillClass(ok, util){
   const warnPct = (+state.settings.warnPct||90)/100.0;
@@ -700,12 +707,66 @@ function renderResults(){
   });
 }
 
+
+function drawUtilChart(values, labels){
+  const canvas = $("utilChart");
+  if(!canvas) return;
+  const dpr = (window.devicePixelRatio||1);
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width = Math.max(320, canvas.clientWidth) * dpr;
+  const H = canvas.height = 180 * dpr;
+  ctx.clearRect(0,0,W,H);
+
+  const pad = 12*dpr;
+  const maxY = 140; // percent
+  const labelH = 18*dpr;
+  const chartW = W - pad*2;
+  const chartH = H - pad*2 - labelH;
+
+  // grid + y labels
+  ctx.strokeStyle = "rgba(167,177,189,0.25)";
+  ctx.fillStyle = "rgba(167,177,189,0.65)";
+  ctx.lineWidth = 1*dpr;
+  ctx.font = `${10*dpr}px system-ui`;
+  ctx.textAlign = "left";
+
+  for(const yVal of [0,50,90,100,140]){
+    const yy = pad + chartH - (yVal/maxY)*chartH;
+    ctx.beginPath(); ctx.moveTo(pad, yy); ctx.lineTo(pad+chartW, yy); ctx.stroke();
+    ctx.fillText(`${yVal}%`, pad, yy-2*dpr);
+  }
+
+  const n = values.length;
+  const gap = 8*dpr;
+  const barW = (chartW - gap*(n-1)) / n;
+
+  for(let i=0;i<n;i++){
+    const v = Math.max(0, Math.min(200, values[i]));
+    const h = (Math.min(v,maxY)/maxY)*chartH;
+    const x = pad + i*(barW+gap);
+    const y = pad + chartH - h;
+
+    ctx.fillStyle = "rgba(77,163,255,0.55)";
+    ctx.fillRect(x, y, barW, h);
+
+    if(v>maxY){
+      ctx.fillStyle = "rgba(255,92,92,0.7)";
+      ctx.fillRect(x, pad, barW, 6*dpr);
+    }
+
+    ctx.fillStyle = "rgba(167,177,189,0.85)";
+    ctx.font = `${10*dpr}px system-ui`;
+    ctx.textAlign = "center";
+    ctx.fillText(labels[i], x + barW/2, pad + chartH + 14*dpr);
+  }
+}
+
 // ---------- CRUD actions ----------
 function bindCrud(){
   // trucks
   $("btnNewTruck").onclick = ()=>{
     const t = {
-      id: crypto.randomUUID(),
+      id: uuid(),
       name: "New truck",
       gvwr: 0, gcwr: 0, payload: 0, maxTow: 0, maxTongue: 0,
       curb: 0, rearGawr: 0, frontGawr: 0
@@ -717,7 +778,7 @@ function bindCrud(){
   $("btnDupTruck").onclick = ()=>{
     const t = state.trucks.find(x=>x.id===selectedTruckId);
     if(!t) return;
-    const copy = { ...structuredClone(t), id: crypto.randomUUID(), name: (t.name||"Truck") + " (copy)" };
+    const copy = { ...structuredClone(t), id: uuid(), name: (t.name||"Truck") + " (copy)" };
     state.trucks.unshift(copy);
     selectedTruckId = copy.id;
     saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();
@@ -732,7 +793,7 @@ function bindCrud(){
 
   // trailers
   $("btnNewTrailer").onclick = ()=>{
-    const tr = { id: crypto.randomUUID(), name:"New trailer", dry:0, dryTongue:0, gvwr:0, freshCap:0 };
+    const tr = { id: uuid(), name:"New trailer", dry:0, dryTongue:0, gvwr:0, freshCap:0 };
     state.trailers.unshift(tr);
     selectedTrailerId = tr.id;
     saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();
@@ -740,7 +801,7 @@ function bindCrud(){
   $("btnDupTrailer").onclick = ()=>{
     const tr = state.trailers.find(x=>x.id===selectedTrailerId);
     if(!tr) return;
-    const copy = { ...structuredClone(tr), id: crypto.randomUUID(), name:(tr.name||"Trailer")+" (copy)" };
+    const copy = { ...structuredClone(tr), id: uuid(), name:(tr.name||"Trailer")+" (copy)" };
     state.trailers.unshift(copy);
     selectedTrailerId = copy.id;
     saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();
