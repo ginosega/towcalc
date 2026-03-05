@@ -4,10 +4,10 @@ function uuid(){ if(typeof crypto!=="undefined"&&crypto.randomUUID) return crypt
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==="x"?r:(r&0x3|0x8);return v.toString(16);});
 }
 const presets=[
-{id:"summer_hookups",name:"Summer • Hookups",tripPatch:{truckGear:180,wdh:80,trailerGear:700,waterGal:5,propaneLb:40,battLb:120,twMode:"range",twLowPct:11.5,twHighPct:13.5}},
-{id:"summer_boondock",name:"Summer • Boondock",tripPatch:{truckGear:220,wdh:85,trailerGear:950,waterGal:30,propaneLb:40,battLb:120,twMode:"range",twLowPct:12.0,twHighPct:14.5}},
-{id:"winter_hookups",name:"Winter • Hookups",tripPatch:{truckGear:260,wdh:85,trailerGear:950,waterGal:5,propaneLb:60,battLb:120,twMode:"range",twLowPct:12.5,twHighPct:15.0}},
-{id:"winter_boondock",name:"Winter • Boondock (Ski lot)",tripPatch:{truckGear:320,wdh:90,trailerGear:1200,waterGal:20,propaneLb:60,battLb:120,twMode:"range",twLowPct:13.0,twHighPct:15.5}},
+{id:"summer_hookups",name:"Summer • Hookups",tripPatch:{truckGear:180,wdh:80,trailerGear:700,waterLb:41.7,propaneLb:40,battLb:120,twMode:"range",twLowPct:11.5,twHighPct:13.5}},
+{id:"summer_boondock",name:"Summer • Boondock",tripPatch:{truckGear:220,wdh:85,trailerGear:950,waterLb:250.2,propaneLb:40,battLb:120,twMode:"range",twLowPct:12.0,twHighPct:14.5}},
+{id:"winter_hookups",name:"Winter • Hookups",tripPatch:{truckGear:260,wdh:85,trailerGear:950,waterLb:41.7,propaneLb:60,battLb:120,twMode:"range",twLowPct:12.5,twHighPct:15.0}},
+{id:"winter_boondock",name:"Winter • Boondock (Ski lot)",tripPatch:{truckGear:320,wdh:90,trailerGear:1200,waterLb:166.8,propaneLb:60,battLb:120,twMode:"range",twLowPct:13.0,twHighPct:15.5}},
 ];
 
 function defaultState(){
@@ -23,7 +23,7 @@ function defaultState(){
     trucks:[{id:truckId,name:"2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",gvwr:7350,gcwr:17000,payload:1391,maxTow:9650,maxTongue:1160,curb:0,rearGawr:4150,frontGawr:3900}],
     trailers,
     trip:{truckId, trailerId:trailers[0].id, presetId:"winter_boondock",
-      truckLoads:[{id:uuid(),name:"Gino",weight:180},{id:uuid(),name:"Cristina",weight:150},{id:uuid(),name:"Jacob",weight:120},{id:uuid(),name:"WDH",weight:90},{id:uuid(),name:"Trip gear",weight:320}],trailerGear:1200,waterGal:20,propaneLb:60,battLb:120,
+      truckLoads:[{id:uuid(),name:"Gino",weight:180},{id:uuid(),name:"Cristina",weight:150},{id:uuid(),name:"Jacob",weight:120},{id:uuid(),name:"WDH",weight:90},{id:uuid(),name:"Trip gear",weight:320}],trailerGear:1200,waterLb:166.8,propaneLb:60,battLb:120,
       twMode:"range",twFixedPct:12.5,twLowPct:13.0,twHighPct:15.5
     }
   };
@@ -53,7 +53,8 @@ function hydrate(s){
   if(Array.isArray(s.trip.passengers) && s.trip.passengers.length){
     if(!Array.isArray(s.trip.truckLoads)) s.trip.truckLoads = [];
     s.trip.passengers.forEach(p=>{
-      const nm = p.name || "Passenger";
+      let nm = p.name || "Passenger";
+      if(nm==="Driver") nm="Gino";
       if(!s.trip.truckLoads.find(x => (x.name||"") === nm)){
         s.trip.truckLoads.push({ id: uuid(), name: nm, weight: Number.isFinite(+p.weight) ? +p.weight : 0 });
       }
@@ -87,7 +88,7 @@ function hydrate(s){
     const battEach = Number.isFinite(+s.trip.battEach) ? +s.trip.battEach : 0;
     s.trip.trailerLoads = [
       { id: uuid(), name:"Cargo", weight:cargo },
-      { id: uuid(), name:"Fresh water (gal)", weight:waterGal },
+      { id: uuid(), name:"Fresh water", weight:(waterGal*8.34) },
       { id: uuid(), name:"Propane", weight:propane },
       { id: uuid(), name:"Batteries", weight:(battCount*battEach) }
     ];
@@ -104,17 +105,12 @@ function estimateCurb(truck){const curb=+truck.curb||0;if(curb>0) return curb;re
 function calc(){
   const truck=getTruck(), tr=getTrailer(), set=state.settings, trip=state.trip;
   const trailerLoads = Array.isArray(trip.trailerLoads) ? trip.trailerLoads : [];
-  const trailerLoadTotalLbs = sum(trailerLoads.map(x=>{
-    const nm = (x.name||"").toLowerCase();
-    const w = +x.weight||0;
-    if(nm.includes("(gal)")) return w*(+set.waterLbPerGal||8.34);
-    return w;
-  }));
+  const trailerLoadTotalLbs = sum(trailerLoads.map(x => (+x.weight||0)));
   const loadedTrailer = (+tr.dry||0) + trailerLoadTotalLbs;
   const dryRatio=((+tr.dryTongue||0)>0 && (+tr.dry||0)>0)?((+tr.dryTongue||0)/(+tr.dry||1)):0.12;
 
   let tongueLow=0,tongueHigh=0,tongueLabel="";
-  if(trip.twMode==="autoDry"){const tw=dryRatio*loadedTrailer;tongueLow=tw;tongueHigh=tw;tongueLabel="Auto (dry ratio)";}
+  if(trip.twMode==="autoDry"){ trip.twMode="fixed"; trip.twFixedPct = (dryRatio*100); }
   else if(trip.twMode==="fixed"){const pct=(+trip.twFixedPct||12.5)/100;const tw=pct*loadedTrailer;tongueLow=tw;tongueHigh=tw;tongueLabel="Fixed %";}
   else {const low=(+trip.twLowPct||12)/100, high=(+trip.twHighPct||15)/100;tongueLow=low*loadedTrailer;tongueHigh=high*loadedTrailer;tongueLabel="Range %";}
 
@@ -400,7 +396,7 @@ function bindTrip(){
       else { row.weight=weight; }
     };
     if(Number.isFinite(+patch.trailerGear)) upsertTrailer("Cargo", +patch.trailerGear);
-    if(Number.isFinite(+patch.waterGal)) upsertTrailer("Fresh water (gal)", +patch.waterGal);
+    if(Number.isFinite(+patch.waterLb)) upsertTrailer("Fresh water", +patch.waterLb);
     if(Number.isFinite(+patch.propaneLb)) upsertTrailer("Propane", +patch.propaneLb);
     if(Number.isFinite(+patch.battLb)) upsertTrailer("Batteries", +patch.battLb);
 
@@ -446,6 +442,9 @@ function bindSettings(){
 
 function renderResults(){
   const r=calc();
+  const hintEl = $("dryRatioHint");
+  if(hintEl){ hintEl.textContent = `Dry ratio (dry tongue ÷ dry weight) for this trailer is ${(r.dryRatio*100).toFixed(1)}%`; }
+
   const warnPct=(+state.settings.warnPct||90)/100;
 
   const cards=[
