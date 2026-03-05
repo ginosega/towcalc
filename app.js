@@ -192,8 +192,8 @@ function renderLists(){
   state.trailers.forEach(tr=>{
     const div=document.createElement("div");
     div.className="item"+(tr.id===selectedTrailerId?" active":"");
-    div.innerHTML=`<div><div class="name">${escapeHtml(tr.name||"Unnamed trailer")}</div><div class="meta">Dry ${fmtLb(tr.dry||0)} • GVWR ${fmtLb(tr.gvwr||0)}</div></div><div class="badge">${fmtLb(tr.dryTongue||0)} tongue</div>`;
-    div.onclick=()=>{selectedTrailerId=tr.id; renderLists(); renderTrailerForm(); syncTripSelectors(); saveState();};
+    div.innerHTML=`<div><div class="name">${escapeHtml(tr.name||"Unnamed trailer")}</div><div class="meta">Dry ${fmtLb(tr.dry||0)} • GVWR ${fmtLb(tr.gvwr||0)} • Dry tongue ${fmtLb(tr.dryTongue||0)} lb</div></div>`;
+    div.onclick=()=>{selectedTrailerId=tr.id; renderLists(); renderTrailerForm(); updateTrailerComputed(); syncTripSelectors(); saveState();};
     listT.appendChild(div);
   });
 }
@@ -233,7 +233,8 @@ function bindTruckForm(){
 }
 
 function updateTrailerComputed(){
-  const id = (state.ui && state.ui.editTrailerId) || null;
+  // Use the app's selected trailer id (used throughout the trailers UI)
+  const id = (typeof selectedTrailerId !== "undefined" ? selectedTrailerId : null) || null;
   const tr = state.trailers.find(t=>t.id===id) || null;
   const elPayload = $("trCalcPayload");
   const elPct = $("trCalcDryTonguePct");
@@ -248,16 +249,17 @@ function updateTrailerComputed(){
   }
   const dry = +tr.dry||0;
   const gvwr = +tr.gvwr||0;
-  const tongue = +tr.tongue||0;
+  const dryTongue = +tr.dryTongue||0;
 
   const payload = gvwr - dry;
-  const pct = (dry>0) ? (tongue/dry*100) : NaN;
+  const pct = (dry>0) ? (dryTongue/dry*100) : NaN;
   const grossHitch = (isFinite(pct) ? gvwr*(pct/100) : NaN);
 
   elPayload.textContent = fmtLb(payload);
   elPct.textContent = (isFinite(pct) ? pct.toFixed(1) : "—") + "%";
   elGross.textContent = (isFinite(grossHitch) ? fmtLb(grossHitch) : "—");
 }
+
 
 function bindTrailerForm(){
   const fields=[["trailerName","name",v=>v],["trailerDry","dry",num],["trailerDryTongue","dryTongue",num],["trailerGVWR","gvwr",num],["trailerFreshCap","freshCap",num]];
