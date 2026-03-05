@@ -201,3 +201,10 @@ input.num{text-align:right;font-variant-numeric:tabular-nums}
 #tab-trip .passRow{ width:100%; }
 #tab-trip .passRow input{ box-sizing:border-box; }
 
+
+/* v38: unify checklist and about fonts */
+#tab-settings .card ul,
+#tab-settings .card p{
+  font-size:14px;
+  line-height:1.5;
+}
