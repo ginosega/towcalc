@@ -123,47 +123,22 @@
 
       <div class="grid2">
         <div class="card">
-          <h3>People & truck load</h3>
+          <h3>Truck load</h3>
           <div class="form">
-            <div id="passengers" class="listbox"></div>
-            <button id="btnAddPassenger" class="btn btn-secondary">Add passenger</button>
-            <hr/>
-            <label>Truck cargo (lbs)
-              <input id="truckCargo" type="number" step="1" min="0"/>
-            </label>
-            <label>Hitch hardware (WDH, sway, etc.) (lbs)
-              <input id="hitchHardware" type="number" step="1" min="0"/>
-            </label>
-            <div class="muted small">Truck cargo includes anything in cab/bed (tools, winter kit, chairs, etc.).</div>
+            <div class="muted small">Everything that counts against payload (people + gear + accessories + hitch hardware). Add/remove items as needed.</div>
+            <div id="truckLoads" class="listbox"></div>
+            <button id="btnAddLoad" class="btn btn-secondary">Add load</button>
           </div>
+        </div>
         </div>
 
         <div class="card">
           <h3>Trailer load</h3>
           <div class="form">
-            <label>Added trailer cargo (lbs)
-              <input id="trailerCargo" type="number" step="1" min="0"/>
-            </label>
-
-            <div class="row">
-              <label>Fresh water carried (gal)
-                <input id="freshWater" type="number" step="0.5" min="0"/>
-              </label>
-              <label>Propane (lbs)
-                <input id="propane" type="number" step="1" min="0"/>
-              </label>
-            </div>
-
-            <div class="row">
-              <label>Batteries count
-                <input id="battCount" type="number" step="1" min="0"/>
-              </label>
-              <label>Battery weight each (lbs)
-                <input id="battEach" type="number" step="1" min="0"/>
-              </label>
-            </div>
-
-            <div class="muted small">Added trailer cargo is everything you pack into the trailer (food, clothes, ski gear, etc.).</div>
+            <div class="muted small">Add items that count toward trailer loaded weight. Tip: name an item with “(gal)” (e.g., “Fresh water (gal)”) and TowCalc will convert gallons → pounds using the Water weight setting.</div>
+            <div id="trailerLoads" class="listbox"></div>
+            <button id="btnAddTrailerLoad" class="btn btn-secondary">Add load</button>
+</div>
           </div>
         </div>
       </div>
