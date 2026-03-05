@@ -518,47 +518,6 @@ function bindBackup(){
 }
 
 
-    });
-  }
-
-  if(btnSave){
-    btnSave.onclick = ()=>{
-      const name = (nameIn?.value||"").trim();
-      if(!name){ setMsg("Enter a profile name to save."); return; }
-      const profiles = loadProfiles();
-      profiles[name] = tripSnapshot();
-      saveProfiles(profiles);
-      renderProfileList();
-      setMsg(`Saved "${name}".`);
-    };
-  }
-  if(btnLoad){
-    btnLoad.onclick = ()=>{
-      const name = (nameIn?.value||listSel?.value||"").trim();
-      if(!name){ setMsg("Choose a profile to load."); return; }
-      const profiles = loadProfiles();
-      const snap = profiles[name];
-      if(!snap){ setMsg(`No profile named "${name}".`); return; }
-      if(!confirm(`Load profile "${name}"? This will replace current Trip tab values.`)) return;
-      applyTripSnapshot(snap);
-      setMsg(`Loaded "${name}".`);
-    };
-  }
-  if(btnDel){
-    btnDel.onclick = ()=>{
-      const name = (nameIn?.value||listSel?.value||"").trim();
-      if(!name){ setMsg("Choose a profile to delete."); return; }
-      const profiles = loadProfiles();
-      if(!profiles[name]){ setMsg(`No profile named "${name}".`); return; }
-      if(!confirm(`Delete profile "${name}"?`)) return;
-      delete profiles[name];
-      saveProfiles(profiles);
-      renderProfileList();
-      if(nameIn) nameIn.value="";
-      setMsg(`Deleted "${name}".`);
-    };
-  }
-}
 
 function bindCalculate(){
   const btn = $("btnCalculate");

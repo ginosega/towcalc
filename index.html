@@ -44,7 +44,106 @@
       <div id="resultsSummary" class="cards"></div>
 
       <div class="grid2">
-        </section>
+        <div class="card">
+          <h3>Utilization</h3>
+          <canvas id="utilChart" height="180"></canvas>
+          <div class="muted small">Bars show percent of limit used. Consider aiming for sustained use under ~90% where practical.</div>
+        </div>
+        <div class="card">
+          <h3>Warnings</h3>
+          <div id="warnings" class="warnings"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Details</h3>
+        <div id="resultsDetails" class="details"></div>
+      </div>
+    </section>
+
+    <section id="tab-trip" class="panel">
+      <div class="panel-head">
+        <h2>Trip setup</h2>
+        <div class="muted">Choose truck & trailer, apply a preset, then refine loads. Presets are starting points.</div>
+      </div>
+
+      <div class="grid2">
+</div>
+
+        <div class="card">
+          <h3>Selections</h3>
+          <div class="form">
+            <label>Truck
+              <select id="tripTruck"></select>
+            </label>
+            <label>Trailer
+              <select id="tripTrailer"></select>
+            </label>
+<div class="muted small">Tip: Use <b>Range %</b> tongue mode for realistic planning (e.g., 12–15%).
+            <hr/>
+            <h4>Tongue weight model</h4>
+
+            <label>Mode
+              <select id="twMode">
+                <option value="fixed">Fixed % of loaded weight</option>
+                <option value="range">Range % of loaded weight</option>
+              </select>
+            </label>
+
+            <div id="twFixed" class="twbox hidden">
+              <label>Loaded tongue %
+                <input id="twFixedPct" type="number" step="0.1" min="5" max="25"/>
+              </label>
+              <div id="dryRatioHint" class="muted small"></div>
+              <div class="muted small">Typical travel trailers often land around 12–15% when loaded.</div>
+            </div>
+
+            <div id="twRange" class="twbox hidden">
+              <div class="row">
+                <label>Low %
+                  <input id="twLowPct" type="number" step="0.1" min="5" max="25"/>
+                </label>
+                <label>High %
+                  <input id="twHighPct" type="number" step="0.1" min="5" max="25"/>
+                </label>
+              </div>
+              <div class="muted small">Warnings are based on the high end of the range.</div>
+          </div>
+        </div>
+
+        </div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Truck load</h3>
+          <div class="form">
+            <div class="muted small">Everything that counts against payload (people + gear + accessories + hitch hardware). Add/remove items as needed.</div>
+            <div id="truckLoads" class="listbox"></div>
+            <button id="btnAddLoad" class="btn btn-secondary">Add load</button>
+          </div>
+        </div>
+        </div>
+
+        <div class="card">
+          <h3>Trailer load</h3>
+          <div class="form">
+            <div class="muted small">Add items that count toward trailer loaded weight. All values are in pounds. (If you add water, propane, etc., enter their estimated weight in pounds.)</div>
+            <div id="trailerLoads" class="listbox"></div>
+            <button id="btnAddTrailerLoad" class="btn btn-secondary">Add load</button>
+</div>
+          </div>
+
+<div class="row" style="margin-top:12px">
+  <button id="btnCalculate" class="btn btn-primary">Calculate</button>
+  <div id="pendingNote" class="muted small hidden" style="align-self:center">Edits pending — press Calculate to update results.</div>
+</div>
+
+        </div>
+      </div>
+
+</section>
 
     <section id="tab-trucks" class="panel">
       <div class="panel-head">
