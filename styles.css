@@ -166,4 +166,11 @@ input::placeholder{color:rgba(167,177,189,0.7)}
 
 .btnRow.actions{margin-top:12px}
 
-.form label span{font-size:13px}
+
+/* Spacing above list action buttons */
+.list + .row{margin-top:12px}
+
+/* Trailer label consistency */
+.form label > span{font-size:13px;line-height:1.2}
+.form label > span.muted{font-size:12px;font-weight:400}
+.form label > span.fw-normal{font-weight:400}
