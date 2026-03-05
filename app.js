@@ -16,7 +16,7 @@ function defaultState(){
   ];
   return {
     settings:{warnPct:90},
-    trucks:[{id:truckId,name:"2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",gvwr:7350,gcwr:17000,payload:1391,maxTow:9650,maxTongue:1160,curb:0,rearGawr:4150,frontGawr:3900}],
+    trucks:[{id:truckId,name:"2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",gvwr:7350,gcwr:17000,payload:1391,maxTow:9650,maxTongue:1160,curb:0,rearGawr:4150,frontGawr:3900,receiverRating:0,hitchRating:0,ballRating:0,tireRating:0}],
     trailers,
     trip:{truckId, trailerId:trailers[0].id, presetId:"winter_boondock",
       truckLoads:[{id:uuid(),name:"Gino",weight:180},{id:uuid(),name:"Cristina",weight:150},{id:uuid(),name:"Jacob",weight:120},{id:uuid(),name:"WDH",weight:90},{id:uuid(),name:"Trip gear",weight:320}],trailerGear:1200,waterLb:166.8,propaneLb:60,battLb:120,
@@ -209,6 +209,10 @@ function renderTruckForm(){
   $("truckCurb").value=t.curb||0;
   $("truckRearGawr").value=t.rearGawr||0;
   $("truckFrontGawr").value=t.frontGawr||0;
+  $("truckReceiverRating").value=t.receiverRating||0;
+  $("truckHitchRating").value=t.hitchRating||0;
+  $("truckBallRating").value=t.ballRating||0;
+  $("truckTireRating").value=t.tireRating||0;
 }
 function renderTrailerForm(){
 
@@ -222,7 +226,7 @@ function renderTrailerForm(){
 }
 
 function bindTruckForm(){
-  const fields=[["truckName","name",v=>v],["truckGVWR","gvwr",num],["truckGCWR","gcwr",num],["truckPayload","payload",num],["truckTow","maxTow",num],["truckTongue","maxTongue",num],["truckCurb","curb",num],["truckRearGawr","rearGawr",num],["truckFrontGawr","frontGawr",num]];
+  const fields=[["truckName","name",v=>v],["truckGVWR","gvwr",num],["truckGCWR","gcwr",num],["truckPayload","payload",num],["truckTow","maxTow",num],["truckTongue","maxTongue",num],["truckCurb","curb",num],["truckRearGawr","rearGawr",num],["truckFrontGawr","frontGawr",num],["truckReceiverRating","receiverRating",num],["truckHitchRating","hitchRating",num],["truckBallRating","ballRating",num],["truckTireRating","tireRating",num]];
   fields.forEach(([id,key,coerce])=>{
     $(id).addEventListener("input", ()=>{
       const t=state.trucks.find(x=>x.id===selectedTruckId); if(!t) return;
@@ -477,6 +481,11 @@ function renderResults(){
   if(!r.tongueOk) w.push({level:"bad",title:"Over tongue rating (WDH)",msg:`Tongue (high) ${fmtLb(r.tongueHigh)} vs max ${fmtLb(r.truck.maxTongue||0)}.`});
   else if(r.utilization.tongue>=warnPct) w.push({level:"warn",title:"Tongue near limit",msg:`Tongue is ${(r.utilization.tongue*100).toFixed(1)}% of max.`});
 
+// Hardware ratings (if provided)
+if((+r.truck.receiverRating||0)>0 && r.tongueHigh>(+r.truck.receiverRating||0)) w.push({level:"bad",title:"Tongue over hitch receiver rating",msg:`Tongue (high) ${fmtLb(r.tongueHigh)} exceeds receiver rating ${fmtLb(+r.truck.receiverRating||0)}.`});
+if((+r.truck.hitchRating||0)>0 && r.tongueHigh>(+r.truck.hitchRating||0)) w.push({level:"bad",title:"Tongue over hitch rating",msg:`Tongue (high) ${fmtLb(r.tongueHigh)} exceeds hitch rating ${fmtLb(+r.truck.hitchRating||0)}.`});
+if((+r.truck.ballRating||0)>0 && r.tongueHigh>(+r.truck.ballRating||0)) w.push({level:"bad",title:"Tongue over hitch ball rating",msg:`Tongue (high) ${fmtLb(r.tongueHigh)} exceeds ball rating ${fmtLb(+r.truck.ballRating||0)}.`});
+
   if(!r.towOk) w.push({level:"bad",title:"Over tow rating",msg:`Trailer weight ${fmtLb(r.loadedTrailer)} exceeds max tow ${fmtLb(r.truck.maxTow||0)}.`});
   else if(r.utilization.tow>=warnPct) w.push({level:"warn",title:"Tow rating near limit",msg:`Trailer weight is ${(r.utilization.tow*100).toFixed(1)}% of max tow.`});
 
@@ -492,7 +501,8 @@ function renderResults(){
   if(!w.length) w.push({level:"ok",title:"No issues detected",msg:"Based on current inputs and assumptions, key limits are within range."});
 
   const warnBox=$("warnings"); warnBox.innerHTML="";
-  w.forEach(x=>{
+  const wShow=(w.length>1)?w.slice(0,3):w;
+  wShow.forEach(x=>{
     const div=document.createElement("div");
     div.className="warnItem "+(x.level==="bad"?"bad":(x.level==="warn"?"warn":""));
     div.innerHTML=`<div class="warnTitle">${escapeHtml(x.title)}</div><div class="muted small">${escapeHtml(x.msg)}</div>`;
