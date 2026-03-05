@@ -191,3 +191,13 @@ input.num{text-align:right;font-variant-numeric:tabular-nums}
   .passRow{grid-template-columns:minmax(0,1fr) 96px 44px}
 }
 
+
+
+/* v37: Settings warn utilization left align */
+#warnPct{ text-align:left !important; }
+
+/* v37: Prevent any horizontal scroll from load rows on mobile */
+#tab-trip .card{ max-width:100%; overflow-x:hidden; }
+#tab-trip .passRow{ width:100%; }
+#tab-trip .passRow input{ box-sizing:border-box; }
+
