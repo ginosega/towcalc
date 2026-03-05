@@ -416,12 +416,12 @@ function renderUtilMeters(r){
   const box = $("utilChart");
   if(!box) return;
   const items = [
-    { key:"Payload", used:r.payloadUsedHigh, limit:r.payloadCap },
-    { key:"Tongue", used:r.tongueHigh, limit:r.truckTongueCap },
-    { key:"Tow", used:r.loadedTrailer, limit:r.truckTowCap },
-    { key:"Trailer GVWR", used:r.loadedTrailer, limit:r.trailerGvwr },
-    { key:"Truck GVWR", used:r.estTruckWeightHigh, limit:r.truckGvwr },
-    { key:"GCWR", used:r.estGCWHigh, limit:r.truckGcwr },
+    { key:"Payload", used:r.payloadUsedHigh, limit:(+r.truck?.payload||0) },
+    { key:"Tongue", used:r.tongueHigh, limit:(+r.truck?.maxTongue||0) },
+    { key:"Tow", used:r.loadedTrailer, limit:(+r.truck?.maxTow||0) },
+    { key:"Trailer GVWR", used:r.loadedTrailer, limit:(+r.tr?.gvwr||0) },
+    { key:"Truck GVWR", used:r.estTruckWeightHigh, limit:(+r.truck?.gvwr||0) },
+    { key:"GCWR", used:r.gcwrHigh, limit:(+r.truck?.gcwr||0) },
   ].filter(x => x.limit && x.limit > 0);
 
   box.innerHTML = `<div class="utilmeters">

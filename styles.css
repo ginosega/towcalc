@@ -160,3 +160,6 @@ input::placeholder{color:rgba(167,177,189,0.7)}
   .cards{grid-template-columns:1fr}
 }
 
+
+/* Top-level section spacing */
+.panel > * + * { margin-top: 14px; }
