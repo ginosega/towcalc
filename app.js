@@ -417,11 +417,11 @@ function renderUtilMeters(r){
   if(!box) return;
   const items = [
     { key:"Payload", used:r.payloadUsedHigh, limit:(+r.truck?.payload||0) },
-    { key:"Tongue", used:r.tongueHigh, limit:(+r.truck?.maxTongue||0) },
-    { key:"Tow", used:r.loadedTrailer, limit:(+r.truck?.maxTow||0) },
-    { key:"Trailer GVWR", used:r.loadedTrailer, limit:(+r.tr?.gvwr||0) },
-    { key:"Truck GVWR", used:r.estTruckWeightHigh, limit:(+r.truck?.gvwr||0) },
-    { key:"GCWR", used:r.gcwrHigh, limit:(+r.truck?.gcwr||0) },
+    { key:"Tongue weight", used:r.tongueHigh, limit:(+r.truck?.maxTongue||0) },
+    { key:"Towing capacity", used:r.loadedTrailer, limit:(+r.truck?.maxTow||0) },
+    { key:"Trailer weight", used:r.loadedTrailer, limit:(+r.tr?.gvwr||0) },
+    { key:"Truck weight", used:r.estTruckWeightHigh, limit:(+r.truck?.gvwr||0) },
+    { key:"Truck/trailer combined weight", used:r.gcwrHigh, limit:(+r.truck?.gcwr||0) },
   ].filter(x => x.limit && x.limit > 0);
 
   box.innerHTML = `<div class="utilmeters">
@@ -447,15 +447,86 @@ function renderResults(){
 
   const warnPct=(+state.settings.warnPct||90)/100;
 
-  const cards=[
-    {title:"Payload", value:(r.payloadRemainingHigh<0)?`${fmtLb(Math.abs(r.payloadRemainingHigh))} over limit`:(r.trip.twMode==="range")?`${fmtLb(r.payloadRemainingHigh)} remaining (high)`:`${fmtLb(r.payloadRemainingHigh)} remaining`,
-     sub:`${fmtLb(r.payloadUsedHigh)} used of ${fmtLb(r.truck.payload||0)}`, ok:r.payloadRemainingHigh>=0, util:r.utilization.payload},
-    {title:"Tongue weight", value:(r.trip.twMode==="range")?`${fmtLb(r.tongueLow)} – ${fmtLb(r.tongueHigh)}`:`${fmtLb(r.tongueHigh)}`,
-     sub:`${fmtLb(r.tongueHigh)} vs ${fmtLb(r.truck.maxTongue||0)} max (WDH) • ${r.tongueLabel}`, ok:r.tongueOk, util:r.utilization.tongue},
-    {title:"Trailer weight", value:`${fmtLb(r.loadedTrailer)}`,
-     sub:`${fmtLb(r.loadedTrailer)} vs ${fmtLb(r.truck.maxTow||0)} tow • ${fmtLb(r.tr.gvwr||0)} trailer GVWR`, ok:r.towOk&&r.trailerGvwrOk, util:Math.max(r.utilization.tow,r.utilization.trailerGvwr)},
-  ];
-  const wrap=$("resultsSummary"); wrap.innerHTML="";
+  
+const cards=[
+  // Payload
+  (()=>{
+    const limit = (+r.truck.payload||0);
+    const used = r.payloadUsedHigh;
+    const rem = limit - used;
+    return {title:"Payload",
+      value:(rem<0)?`${fmtLb(Math.abs(rem))} over limit`:(r.trip.twMode==="range")?`${fmtLb(rem)} remaining (high)`:`${fmtLb(rem)} remaining`,
+      sub:`${fmtLb(used)} used of ${fmtLb(limit)}`,
+      ok: rem>=0,
+      util: (limit>0)? (used/limit) : 0
+    };
+  })(),
+  // Tongue weight
+  (()=>{
+    const limit = (+r.truck.maxTongue||0);
+    const used = r.tongueHigh;
+    const util = (limit>0)? (used/limit) : 0;
+    return {title:"Tongue weight",
+      value:(r.trip.twMode==="range")?`${fmtLb(r.tongueLow)} – ${fmtLb(r.tongueHigh)}`:`${fmtLb(r.tongueHigh)}`,
+      sub:`${fmtLb(r.tongueHigh)} vs ${fmtLb(limit)} max (WDH) • ${r.tongueLabel}`,
+      ok: used<=limit || limit===0 ? r.tongueOk : (used<=limit),
+      util
+    };
+  })(),
+  // Towing capacity
+  (()=>{
+    const limit = (+r.truck.maxTow||0);
+    const used = r.loadedTrailer;
+    const rem = limit - used;
+    const util = (limit>0)? (used/limit) : 0;
+    return {title:"Towing capacity",
+      value:(rem<0)?`${fmtLb(Math.abs(rem))} over limit`:`${fmtLb(rem)} remaining`,
+      sub:`${fmtLb(used)} used of ${fmtLb(limit)}`,
+      ok: used<=limit || limit===0 ? true : (used<=limit),
+      util
+    };
+  })(),
+  // Trailer weight (vs trailer GVWR)
+  (()=>{
+    const limit = (+r.tr.gvwr||0);
+    const used = r.loadedTrailer;
+    const rem = limit - used;
+    const util = (limit>0)? (used/limit) : 0;
+    return {title:"Trailer weight",
+      value:(rem<0)?`${fmtLb(Math.abs(rem))} over limit`:`${fmtLb(rem)} remaining`,
+      sub:`${fmtLb(used)} used of ${fmtLb(limit)} GVWR`,
+      ok: used<=limit || limit===0 ? true : (used<=limit),
+      util
+    };
+  })(),
+  // Truck weight (vs truck GVWR)
+  (()=>{
+    const limit = (+r.truck.gvwr||0);
+    const used = r.estTruckWeightHigh;
+    const rem = limit - used;
+    const util = (limit>0)? (used/limit) : 0;
+    return {title:"Truck weight",
+      value:(rem<0)?`${fmtLb(Math.abs(rem))} over limit`:`${fmtLb(rem)} remaining`,
+      sub:`${fmtLb(used)} used of ${fmtLb(limit)} GVWR (est.)`,
+      ok: used<=limit || limit===0 ? true : (used<=limit),
+      util
+    };
+  })(),
+  // Combined weight (vs GCWR)
+  (()=>{
+    const limit = (+r.truck.gcwr||0);
+    const used = r.gcwrHigh;
+    const rem = limit - used;
+    const util = (limit>0)? (used/limit) : 0;
+    return {title:"Truck/trailer combined weight",
+      value:(rem<0)?`${fmtLb(Math.abs(rem))} over limit`:`${fmtLb(rem)} remaining`,
+      sub:`${fmtLb(used)} used of ${fmtLb(limit)} GCWR (est.)`,
+      ok: used<=limit || limit===0 ? true : (used<=limit),
+      util
+    };
+  })(),
+];
+const wrap=$("resultsSummary"); wrap.innerHTML="";
   cards.forEach(c=>{
     const div=document.createElement("div");
     const klass=pillClass(c.ok,c.util);
@@ -466,13 +537,14 @@ function renderResults(){
 
   const tonguePctLow=r.loadedTrailer>0?(r.tongueLow/r.loadedTrailer)*100:0;
   const tonguePctHigh=r.loadedTrailer>0?(r.tongueHigh/r.loadedTrailer)*100:0;
-  $("resultsDetails").innerHTML=`
-    <div class="card"><div class="label muted small">Selected</div><div><b>${escapeHtml(r.truck.name||"Truck")}</b> towing <b>${escapeHtml(r.tr.name||"Trailer")}</b></div></div>
-    <div class="card"><div class="label muted small">Estimated truck weight</div><div><b>${fmtLb(r.estTruckWeightHigh)}</b> (high tongue)</div><div class="muted small">Curb est ${fmtLb(r.curb)} • GVWR ${fmtLb(r.truck.gvwr||0)} • Util ${(r.utilization.gvwr*100).toFixed(1)}%</div><div class="pill ${pillClass(r.gvwrOk,r.utilization.gvwr)}">${r.gvwrOk?(r.utilization.gvwr>=warnPct?"CAUTION":"OK"):"OVER GVWR"}</div></div>
-    <div class="card"><div class="label muted small">Estimated combined weight</div><div><b>${fmtLb(r.gcwrHigh)}</b> (high tongue)</div><div class="muted small">GCWR ${fmtLb(r.truck.gcwr||0)} • Util ${(r.utilization.gcwr*100).toFixed(1)}%</div><div class="pill ${pillClass(r.gcwrOk,r.utilization.gcwr)}">${r.gcwrOk?(r.utilization.gcwr>=warnPct?"CAUTION":"OK"):"OVER GCWR"}</div></div>
-<div class="muted small">Auto dry ratio: ${(r.dryRatio*100).toFixed(1)}%</div></div>
-    <div class="card"><div class="label muted small">Load breakdown</div><div class="muted small">Truck loads: ${fmtLb(r.truckLoadTotal)}</div><div class="muted small">Trailer loads: ${fmtLb(r.trailerLoadTotalLbs)}</div></div>
-  `;
+  
+$("resultsDetails").innerHTML=`
+  <div class="card"><div class="label muted small">Selected</div><div><b>${escapeHtml(r.truck.name||"Truck")}</b> towing <b>${escapeHtml(r.tr.name||"Trailer")}</b></div></div>
+  <div class="card"><div class="label muted small">Load breakdown</div>
+    <div class="muted small">Truck loads: ${fmtLb(r.truckLoadTotal)}</div>
+    <div class="muted small">Trailer loads: ${fmtLb(r.trailerLoadTotalLbs)}</div>
+  </div>
+`;
 
   const w=[];
   if(r.payloadRemainingHigh<0) w.push({level:"bad",title:"Over payload",msg:`Payload exceeded by ${fmtLb(-r.payloadRemainingHigh)} (high tongue).`});
