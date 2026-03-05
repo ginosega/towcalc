@@ -12,14 +12,13 @@ function defaultState(){
     {id:uuid(),name:"Lance 1995",dry:5273,dryTongue:559,gvwr:7000,freshCap:45},
     {id:uuid(),name:"Brinkley I 265",dry:7012,dryTongue:650,gvwr:9600,freshCap:55},
     {id:uuid(),name:"Lance 1985",dry:5259,dryTongue:642,gvwr:7000,freshCap:45},
-    {id:uuid(),name:"Apex Nano",dry:3495,dryTongue:370,gvwr:4700,freshCap:50},
-  ];
+    {id:uuid(),name:"Apex Nano",dry:3495,dryTongue:370,gvwr:4700,freshCap:50}];
   return {
     settings:{warnPct:90},
     trucks:[{id:truckId,name:"2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",gvwr:7350,gcwr:17000,payload:1391,maxTow:9650,maxTongue:1160,curb:0,rearGawr:4150,frontGawr:3900,receiverRating:0,hitchRating:0,ballRating:0,tireRating:0}],
     trailers,
     trip:{truckId, trailerId:trailers[0].id, presetId:"winter_boondock",
-      truckLoads:[{id:uuid(),name:"Gino",weight:180},{id:uuid(),name:"Cristina",weight:150},{id:uuid(),name:"Jacob",weight:120},{id:uuid(),name:"WDH",weight:90},{id:uuid(),name:"Trip gear",weight:320}],trailerGear:1200,waterLb:166.8,propaneLb:60,battLb:120,
+      truckLoads:[{id:uuid(),name:"Gino",weight:180},{id:uuid(),name:"Cristina",weight:150},{id:uuid(),name:"Jacob",weight:120},{id:uuid(),name:"WDH",weight:90}],trailerGear:1200,waterLb:166.8,propaneLb:60,battLb:120,
       twMode:"range",twFixedPct:12.5,twLowPct:13.0,twHighPct:15.5
     }
   };
@@ -97,9 +96,7 @@ function hydrate(s){
       { id: uuid(), name:"Gino", weight:180 },
       { id: uuid(), name:"Cristina", weight:150 },
       { id: uuid(), name:"Jacob", weight:120 },
-      { id: uuid(), name:"WDH", weight:hitch },
-      { id: uuid(), name:"Trip gear", weight:cargo }
-    ];
+      { id: uuid(), name:"WDH", weight:hitch },    ];
   }
 
   // Back-compat: migrate trailer inputs to trailerLoads
@@ -435,8 +432,7 @@ function renderUtilMeters(r){
     { key:"Towing capacity", used:r.loadedTrailer, limit:(+r.truck?.maxTow||0) },
     { key:"Trailer weight", used:r.loadedTrailer, limit:(+r.tr?.gvwr||0) },
     { key:"Truck weight", used:r.estTruckWeightHigh, limit:(+r.truck?.gvwr||0) },
-    { key:"Truck/trailer combined weight", used:r.gcwrHigh, limit:(+r.truck?.gcwr||0) },
-  ].filter(x => x.limit && x.limit > 0);
+    { key:"Truck/trailer combined weight", used:r.gcwrHigh, limit:(+r.truck?.gcwr||0) }].filter(x => x.limit && x.limit > 0);
 
   box.innerHTML = `<div class="utilmeters">
     ${items.map(it=>{
@@ -538,8 +534,7 @@ const cards=[
       ok: used<=limit || limit===0 ? true : (used<=limit),
       util
     };
-  })(),
-];
+  })()];
 const wrap=$("resultsSummary"); wrap.innerHTML="";
   cards.forEach(c=>{
     const div=document.createElement("div");

@@ -176,3 +176,18 @@ input::placeholder{color:rgba(167,177,189,0.7)}
 .form label > span.fw-normal{font-weight:400}
 
 input.num{text-align:right;font-variant-numeric:tabular-nums}
+
+
+/* v36: Mobile load rows should not overflow */
+.passRow{display:grid;grid-template-columns:minmax(0,1fr) 110px 44px;gap:10px;align-items:center}
+.passRow input{width:100%;min-width:0}
+.passRow .btn{width:44px;min-width:44px;justify-content:center;padding:0}
+
+/* v36: Left-justify specific numeric fields */
+#tab-trip #twFixedPct, #tab-trip #twLowPct, #tab-trip #twHighPct{ text-align:left !important; }
+#tab-trucks .form input.num, #tab-trailers .form input.num{ text-align:left !important; }
+
+@media (max-width:520px){
+  .passRow{grid-template-columns:minmax(0,1fr) 96px 44px}
+}
+
