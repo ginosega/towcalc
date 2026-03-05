@@ -71,11 +71,15 @@ function hydrate(s){
   s.trip={...d.trip,...(s.trip||{})};
   if(!s.trip.truckId||!s.trucks.find(t=>t.id===s.trip.truckId)) s.trip.truckId=s.trucks[0].id;
   if(!s.trip.trailerId||!s.trailers.find(t=>t.id===s.trip.trailerId)) s.trip.trailerId=s.trailers[0].id;
-  if(!Array.isArray(s.trip.passengers)||!s.trip.passengers.length) s.trip.passengers=[{id:uuid(),name:"Driver",weight:180}];
 
-  // Back-compat: migrate older schemas to truckLoads
+  // Back-compat: migrate older schemas to truckLoads (then drop passengers)
   if(Array.isArray(s.trip.passengers) && s.trip.passengers.length){
-    if(!Array.isArray(s.trip.truckLoads)) s.trip.truckLoads = [];
+    if(!Array.isArray(s.trip.truckLoads))     s.trip.truckLoads = [
+      { id: uuid(), name:"Gino", weight:180 },
+      { id: uuid(), name:"Cristina", weight:150 },
+      { id: uuid(), name:"Jacob", weight:120 },
+      { id: uuid(), name:"WDH", weight:hitch }
+    ];
     s.trip.passengers.forEach(p=>{
       let nm = p.name || "Passenger";
       if(nm==="Driver") nm="Gino";
@@ -83,6 +87,8 @@ function hydrate(s){
         s.trip.truckLoads.push({ id: uuid(), name: nm, weight: Number.isFinite(+p.weight) ? +p.weight : 0 });
       }
     });
+    // drop passengers after merge
+    delete s.trip.passengers;
   }
   if(!Array.isArray(s.trip.truckLoads) || s.trip.truckLoads.length===0){
     const cargo = Number.isFinite(+s.trip.truckCargo) ? +s.trip.truckCargo : 0;
@@ -95,13 +101,6 @@ function hydrate(s){
       { id: uuid(), name:"Trip gear", weight:cargo }
     ];
   }
-  const ensure = (name, weight=0) => {
-    if(!s.trip.truckLoads.find(x => (x.name||"") === name)){
-      s.trip.truckLoads.push({ id: uuid(), name, weight });
-    }
-  };
-  ensure("WDH", 0);
-  ensure("Trip gear", 0);
 
   // Back-compat: migrate trailer inputs to trailerLoads
   if(!Array.isArray(s.trip.trailerLoads) || s.trip.trailerLoads.length===0){
@@ -612,8 +611,11 @@ function bindCrud(){
 }
 
 function bindBackup(){
+  $("btnImport").onclick=()=>{ $("fileImport").click(); };
   $("btnExport").onclick=()=>{
-    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const s = JSON.parse(JSON.stringify(state));
+    if(s.trip) delete s.trip.passengers;
+    const blob=new Blob([JSON.stringify(s,null,2)],{type:"application/json"});
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a"); a.href=url; a.download="towcalc-backup.json"; a.click();
     URL.revokeObjectURL(url);
