@@ -488,10 +488,7 @@ function renderResults(){
     warnBox.appendChild(div);
   });
 
-  drawUtilChart([
-    r.utilization.payload*100, r.utilization.tongue*100, r.utilization.tow*100,
-    r.utilization.gvwr*100, r.utilization.gcwr*100, r.utilization.trailerGvwr*100
-  ], ["Payload","Tongue","Tow","Truck GVWR","GCWR","Trailer GVWR"]);
+  renderUtilMeters(r);
 }
 
 function bindCrud(){
@@ -574,3 +571,4 @@ function boot(rerender=false){
 }
 
 boot();
+function drawUtilChart(r){ try{ renderUtilMeters(r); }catch(e){} }
