@@ -1,6 +1,5 @@
 
 const STORAGE_KEY="towcalc_state_v2";
-const PROFILES_KEY="towcalc_trip_profiles_v1";
 let tripDirty=false;
 function uuid(){ if(typeof crypto!=="undefined"&&crypto.randomUUID) return crypto.randomUUID();
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==="x"?r:(r&0x3|0x8);return v.toString(16);});
@@ -43,38 +42,6 @@ function clearTripDirty(){
   tripDirty = false;
   const note = $("pendingNote");
   if(note) note.classList.add("hidden");
-}
-function loadProfiles(){
-  try{ return JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}"); }catch{ return {}; }
-}
-function saveProfiles(obj){
-  localStorage.setItem(PROFILES_KEY, JSON.stringify(obj));
-}
-function tripSnapshot(){
-  const t = state.trip;
-  return {
-    truckId: t.truckId,
-    trailerId: t.trailerId,
-    twMode: t.twMode,
-    twFixedPct: t.twFixedPct,
-    twLowPct: t.twLowPct,
-    twHighPct: t.twHighPct,
-    truckLoads: structuredClone(t.truckLoads || []),
-    trailerLoads: structuredClone(t.trailerLoads || [])
-  };
-}
-function applyTripSnapshot(snap){
-  state.trip.truckId = snap.truckId;
-  state.trip.trailerId = snap.trailerId;
-  state.trip.twMode = snap.twMode;
-  state.trip.twFixedPct = snap.twFixedPct;
-  state.trip.twLowPct = snap.twLowPct;
-  state.trip.twHighPct = snap.twHighPct;
-  state.trip.truckLoads = structuredClone(snap.truckLoads || []);
-  state.trip.trailerLoads = structuredClone(snap.trailerLoads || []);
-  saveState();
-  renderTrip();
-  markTripDirty();
 }
 function activateTab(tabId){
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active", b.dataset.tab===tabId));
@@ -551,38 +518,6 @@ function bindBackup(){
 }
 
 
-function renderProfileList(){
-  const sel = $("profileList");
-  if(!sel) return;
-  const profiles = loadProfiles();
-  const names = Object.keys(profiles).sort((a,b)=>a.localeCompare(b));
-  sel.innerHTML="";
-  const placeholder = document.createElement("option");
-  placeholder.value="";
-  placeholder.textContent = names.length ? "Select a profile…" : "No saved profiles";
-  sel.appendChild(placeholder);
-  names.forEach(n=>{
-    const o=document.createElement("option");
-    o.value=n; o.textContent=n;
-    sel.appendChild(o);
-  });
-}
-
-function bindProfiles(){
-  renderProfileList();
-  const msg = $("profileMsg");
-  const setMsg = (t)=>{ if(msg) msg.textContent=t||""; };
-
-  const btnSave = $("btnSaveProfile");
-  const btnLoad = $("btnLoadProfile");
-  const btnDel  = $("btnDeleteProfile");
-  const nameIn  = $("profileName");
-  const listSel = $("profileList");
-
-  if(listSel && nameIn){
-    listSel.addEventListener("change", e=>{
-      const n=e.target.value;
-      if(n){ nameIn.value=n; }
     });
   }
 
@@ -654,7 +589,6 @@ function boot(rerender=false){
   bindTruckForm();
   bindTrailerForm();
   bindTrip();
-  bindProfiles();
   bindCalculate();
   bindCrud();
   bindBackup();
