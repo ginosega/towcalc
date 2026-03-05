@@ -77,3 +77,7 @@ input:focus,select:focus{border-color:#3f7ec0}
 .util-yellow .fill{background:rgba(234,179,8,0.95)}
 .util-red .fill{background:rgba(239,68,68,0.95)}
 
+
+.fw-normal{font-weight:400}
+
+.readonly{margin-top:6px;padding:10px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:12px;background:rgba(0,0,0,0.03);font-variant-numeric:tabular-nums}

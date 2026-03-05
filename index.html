@@ -247,12 +247,20 @@
               <label>GVWR (lbs)
                 <input id="trailerGVWR" type="number" step="1" min="0"/>
               </label>
-              <label><b>Fresh water capacity (gal)</b> <span class="muted">8.34 lbs/gal</span><input id="trailerFreshCap" type="number" step="0.5" min="0"/>
+              <label><span style="font-weight:700">Fresh water capacity (gal)</span> <span class="muted fw-normal">8.34 lbs/gal</span><input id="trailerFreshCap" type="number" step="0.5" min="0"/>
               </label>
-            
-            <hr/>
-            <div class="calcblock">
-              <div class="calcrow"><div class="calclabel"><b>Payload capacity</b> <span class="muted">GVWR minus dry weight</span></div><div id="trCalcPayload" class="calcvalue"></div></div>
+<div id="trCalcPayload" class="calcvalue">
+<hr/>
+<label><span style="font-weight:700">Payload capacity</span> <span class="muted fw-normal">GVWR minus dry weight</span>
+  <div id="trCalcPayload" class="readonly"></div>
+</label>
+<label><span style="font-weight:700">Dry tongue weight %</span> <span class="muted fw-normal">dry hitch weight / dry weight</span>
+  <div id="trCalcDryTonguePct" class="readonly"></div>
+</label>
+<label><span style="font-weight:700">Gross hitch weight</span> <span class="muted fw-normal">GVWR * dry tongue weight %</span>
+  <div id="trCalcGrossHitch" class="readonly"></div>
+</label>
+</div></div>
               <div class="calcrow"><div class="calclabel"><b>Dry tongue weight %</b> <span class="muted">dry hitch weight / dry weight</span></div><div id="trCalcDryTonguePct" class="calcvalue"></div></div>
               <div class="calcrow"><div class="calclabel"><b>Gross hitch weight</b> <span class="muted">GVWR * dry tongue weight %</span></div><div id="trCalcGrossHitch" class="calcvalue"></div></div>
             </div>

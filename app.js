@@ -226,14 +226,24 @@ function bindTruckForm(){
     $(id).addEventListener("input", ()=>{
       const t=state.trucks.find(x=>x.id===selectedTruckId); if(!t) return;
       t[key]=coerce($(id).value);
-      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed();
+      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed(); updateTrailerComputed();
     });
   });
 }
 
 function updateTrailerComputed(){
-  const tr = state.trailers.find(t=>t.id===state.ui.editTrailerId) || null;
-  if(!tr) return;
+  const editId = (state.ui && (state.ui.editTrailerId || state.ui.trailerId)) || null;
+  const id = editId || (state.trip ? state.trip.trailerId : null);
+  const tr = state.trailers.find(t=>t.id===id) || null;
+  const elPayload = $("trCalcPayload");
+  const elPct = $("trCalcDryTonguePct");
+  const elGross = $("trCalcGrossHitch");
+  if(!tr){
+    if(elPayload) elPayload.textContent = "—";
+    if(elPct) elPct.textContent = "—";
+    if(elGross) elGross.textContent = "—";
+    return;
+  }
   const dry = +tr.dry||0;
   const gvwr = +tr.gvwr||0;
   const tongue = +tr.tongue||0;
@@ -242,9 +252,6 @@ function updateTrailerComputed(){
   const pct = (dry>0) ? (tongue/dry*100) : NaN;
   const grossHitch = (isFinite(pct) ? gvwr*(pct/100) : NaN);
 
-  const elPayload = $("trCalcPayload");
-  const elPct = $("trCalcDryTonguePct");
-  const elGross = $("trCalcGrossHitch");
   if(elPayload) elPayload.textContent = fmtLb(payload);
   if(elPct) elPct.textContent = (isFinite(pct) ? pct.toFixed(1) : "—") + "%";
   if(elGross) elGross.textContent = (isFinite(grossHitch) ? fmtLb(grossHitch) : "—");
@@ -256,7 +263,7 @@ function bindTrailerForm(){
     $(id).addEventListener("input", ()=>{
       const tr=state.trailers.find(x=>x.id===selectedTrailerId); if(!tr) return;
       tr[key]=coerce($(id).value);
-      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed();
+      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed(); updateTrailerComputed();
     });
   });
 }
