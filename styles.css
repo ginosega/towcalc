@@ -81,3 +81,5 @@ input:focus,select:focus{border-color:#3f7ec0}
 .fw-normal{font-weight:400}
 
 .readonly{margin-top:6px;padding:10px 12px;border:1px solid rgba(255,255,255,0.18);border-radius:12px;background:rgba(255,255,255,0.04);color:inherit;font-size:16px;line-height:1.2;font-variant-numeric:tabular-nums}
+
+.btnRow button{font-size:16px;}

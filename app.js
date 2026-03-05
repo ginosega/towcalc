@@ -444,7 +444,7 @@ function renderResults(){
   const warnPct=(+state.settings.warnPct||90)/100;
 
   const cards=[
-    {title:"Payload", value:(r.trip.twMode==="range")?`${fmtLb(r.payloadRemainingHigh)} remaining (high)`: `${fmtLb(r.payloadRemainingHigh)} remaining`,
+    {title:"Payload", value:(r.payloadRemainingHigh<0)?`${fmtLb(Math.abs(r.payloadRemainingHigh))} over limit`:(r.trip.twMode==="range")?`${fmtLb(r.payloadRemainingHigh)} remaining (high)`:`${fmtLb(r.payloadRemainingHigh)} remaining`,
      sub:`${fmtLb(r.payloadUsedHigh)} used of ${fmtLb(r.truck.payload||0)}`, ok:r.payloadRemainingHigh>=0, util:r.utilization.payload},
     {title:"Tongue weight", value:(r.trip.twMode==="range")?`${fmtLb(r.tongueLow)} – ${fmtLb(r.tongueHigh)}`:`${fmtLb(r.tongueHigh)}`,
      sub:`${fmtLb(r.tongueHigh)} vs ${fmtLb(r.truck.maxTongue||0)} max (WDH) • ${r.tongueLabel}`, ok:r.tongueOk, util:r.utilization.tongue},
@@ -463,10 +463,10 @@ function renderResults(){
   const tonguePctLow=r.loadedTrailer>0?(r.tongueLow/r.loadedTrailer)*100:0;
   const tonguePctHigh=r.loadedTrailer>0?(r.tongueHigh/r.loadedTrailer)*100:0;
   $("resultsDetails").innerHTML=`
-    <div class="card"><div class="label muted small">Selected</div><div><b>${escapeHtml(r.truck.name||"Truck")}</b> towing <b>${escapeHtml(r.tr.name||"Trailer")}</b></div><div class="muted small">Preset: ${escapeHtml(([].find(p=>p.id===state.trip.presetId)||{}).name||"")}</div></div>
+    <div class="card"><div class="label muted small">Selected</div><div><b>${escapeHtml(r.truck.name||"Truck")}</b> towing <b>${escapeHtml(r.tr.name||"Trailer")}</b></div></div>
     <div class="card"><div class="label muted small">Estimated truck weight</div><div><b>${fmtLb(r.estTruckWeightHigh)}</b> (high tongue)</div><div class="muted small">Curb est ${fmtLb(r.curb)} • GVWR ${fmtLb(r.truck.gvwr||0)} • Util ${(r.utilization.gvwr*100).toFixed(1)}%</div><div class="pill ${pillClass(r.gvwrOk,r.utilization.gvwr)}">${r.gvwrOk?(r.utilization.gvwr>=warnPct?"CAUTION":"OK"):"OVER GVWR"}</div></div>
     <div class="card"><div class="label muted small">Estimated combined weight</div><div><b>${fmtLb(r.gcwrHigh)}</b> (high tongue)</div><div class="muted small">GCWR ${fmtLb(r.truck.gcwr||0)} • Util ${(r.utilization.gcwr*100).toFixed(1)}%</div><div class="pill ${pillClass(r.gcwrOk,r.utilization.gcwr)}">${r.gcwrOk?(r.utilization.gcwr>=warnPct?"CAUTION":"OK"):"OVER GCWR"}</div></div>
-    <div class="card"><div class="label muted small">Tongue %</div><div><b>${(state.trip.twMode==="range")?(fmtPct(tonguePctLow)+" – "+fmtPct(tonguePctHigh)):fmtPct(tonguePctHigh)}</b></div><div class="muted small">Auto dry ratio: ${(r.dryRatio*100).toFixed(1)}%</div></div>
+<div class="muted small">Auto dry ratio: ${(r.dryRatio*100).toFixed(1)}%</div></div>
     <div class="card"><div class="label muted small">Load breakdown</div><div class="muted small">Truck loads: ${fmtLb(r.truckLoadTotal)}</div><div class="muted small">Trailer loads: ${fmtLb(r.trailerLoadTotalLbs)}</div></div>
   `;
 
@@ -504,8 +504,7 @@ function renderResults(){
 
 function bindCrud(){
   $("btnNewTruck").onclick=()=>{const t={id:uuid(),name:"New truck",gvwr:0,gcwr:0,payload:0,maxTow:0,maxTongue:0,curb:0,rearGawr:0,frontGawr:0}; state.trucks.unshift(t); selectedTruckId=t.id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();};
-  $("btnDupTruck").onclick=()=>{const t=state.trucks.find(x=>x.id===selectedTruckId); if(!t) return; const copy={...structuredClone(t),id:uuid(),name:(t.name||"Truck")+" (copy)"}; state.trucks.unshift(copy); selectedTruckId=copy.id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();};
-  $("btnDelTruck").onclick=()=>{if(state.trucks.length<=1) return alert("Keep at least one truck."); state.trucks=state.trucks.filter(x=>x.id!==selectedTruckId); if(!state.trucks.find(x=>x.id===state.trip.truckId)) state.trip.truckId=state.trucks[0].id; selectedTruckId=state.trucks[0].id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();};
+    $("btnDelTruck").onclick=()=>{if(state.trucks.length<=1) return alert("Keep at least one truck."); state.trucks=state.trucks.filter(x=>x.id!==selectedTruckId); if(!state.trucks.find(x=>x.id===state.trip.truckId)) state.trip.truckId=state.trucks[0].id; selectedTruckId=state.trucks[0].id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();};
 
   $("btnNewTrailer").onclick=()=>{const tr={id:uuid(),name:"New trailer",dry:0,dryTongue:0,gvwr:0,freshCap:0}; state.trailers.unshift(tr); selectedTrailerId=tr.id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};
     $("btnDelTrailer").onclick=()=>{if(state.trailers.length<=1) return alert("Keep at least one trailer."); state.trailers=state.trailers.filter(x=>x.id!==selectedTrailerId); if(!state.trailers.find(x=>x.id===state.trip.trailerId)) state.trip.trailerId=state.trailers[0].id; selectedTrailerId=state.trailers[0].id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};

@@ -18,7 +18,7 @@
       </div>
     </div>
     <div class="top-actions">
-      <button id="btnExport" class="btn btn-secondary">Export</button>
+      
       <label class="btn btn-secondary filebtn">
         Import <input id="fileImport" type="file" accept="application/json"/>
       </label>
@@ -46,7 +46,7 @@
       <div class="grid2">
         <div class="card">
           <h3>Utilization</h3>
-          <canvas id="utilChart" height="180"></canvas>
+          <div id="utilChart"></div>
           <div class="muted small">Bars show percent of limit used. Consider aiming for sustained use under ~90% where practical.</div>
         </div>
         <div class="card">
@@ -157,8 +157,7 @@
           <div id="truckList" class="list"></div>
           <div class="row">
             <button id="btnNewTruck" class="btn btn-primary">New truck</button>
-            <button id="btnDupTruck" class="btn btn-secondary">Duplicate</button>
-            <button id="btnDelTruck" class="btn btn-danger">Delete</button>
+<button id="btnDelTruck" class="btn btn-danger">Delete truck</button>
           </div>
         </div>
 
