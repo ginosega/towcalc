@@ -222,8 +222,7 @@
           <div id="trailerList" class="list"></div>
           <div class="row">
             <button id="btnNewTrailer" class="btn btn-primary">New trailer</button>
-            <button id="btnDupTrailer" class="btn btn-secondary">Duplicate</button>
-            <button id="btnDelTrailer" class="btn btn-danger">Delete</button>
+<button id="btnDelTrailer" class="btn btn-danger">Delete trailer</button>
           </div>
         </div>
 
@@ -249,7 +248,11 @@
               </label>
               <label><span style="font-weight:700">Fresh water capacity (gal)</span> <span class="muted fw-normal">8.34 lbs/gal</span><input id="trailerFreshCap" type="number" step="0.5" min="0"/>
               </label>
-<div id="trCalcPayload" class="calcvalue">
+<div id="trCalcPayload" class="calcvalue"></div></div>
+              <div class="calcrow"><div class="calclabel"><b>Dry tongue weight %</b> <span class="muted">dry hitch weight / dry weight</span></div><div id="trCalcDryTonguePct" class="calcvalue"></div></div>
+              <div class="calcrow"><div class="calclabel"><b>Gross hitch weight</b> <span class="muted">GVWR * dry tongue weight %</span></div><div id="trCalcGrossHitch" class="calcvalue"></div></div>
+            </div>
+
 <hr/>
 <label><span style="font-weight:700">Payload capacity</span> <span class="muted fw-normal">GVWR minus dry weight</span>
   <div id="trCalcPayload" class="readonly"></div>
@@ -260,14 +263,7 @@
 <label><span style="font-weight:700">Gross hitch weight</span> <span class="muted fw-normal">GVWR * dry tongue weight %</span>
   <div id="trCalcGrossHitch" class="readonly"></div>
 </label>
-</div></div>
-              <div class="calcrow"><div class="calclabel"><b>Dry tongue weight %</b> <span class="muted">dry hitch weight / dry weight</span></div><div id="trCalcDryTonguePct" class="calcvalue"></div></div>
-              <div class="calcrow"><div class="calclabel"><b>Gross hitch weight</b> <span class="muted">GVWR * dry tongue weight %</span></div><div id="trCalcGrossHitch" class="calcvalue"></div></div>
-            </div>
-</div>
-
-            
-</div>
+          </div>
         </div>
       </div>
     </section>

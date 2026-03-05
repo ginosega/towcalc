@@ -218,6 +218,7 @@ function renderTrailerForm(){
   $("trailerDryTongue").value=tr.dryTongue||0;
   $("trailerGVWR").value=tr.gvwr||0;
   $("trailerFreshCap").value=tr.freshCap||0;
+  updateTrailerComputed();
 }
 
 function bindTruckForm(){
@@ -226,22 +227,23 @@ function bindTruckForm(){
     $(id).addEventListener("input", ()=>{
       const t=state.trucks.find(x=>x.id===selectedTruckId); if(!t) return;
       t[key]=coerce($(id).value);
-      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed(); updateTrailerComputed();
+      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed();
     });
   });
 }
 
 function updateTrailerComputed(){
-  const editId = (state.ui && (state.ui.editTrailerId || state.ui.trailerId)) || null;
-  const id = editId || (state.trip ? state.trip.trailerId : null);
+  const id = (state.ui && state.ui.editTrailerId) || null;
   const tr = state.trailers.find(t=>t.id===id) || null;
   const elPayload = $("trCalcPayload");
   const elPct = $("trCalcDryTonguePct");
   const elGross = $("trCalcGrossHitch");
+  if(!elPayload || !elPct || !elGross) return;
+
   if(!tr){
-    if(elPayload) elPayload.textContent = "—";
-    if(elPct) elPct.textContent = "—";
-    if(elGross) elGross.textContent = "—";
+    elPayload.textContent = "—";
+    elPct.textContent = "—";
+    elGross.textContent = "—";
     return;
   }
   const dry = +tr.dry||0;
@@ -252,9 +254,9 @@ function updateTrailerComputed(){
   const pct = (dry>0) ? (tongue/dry*100) : NaN;
   const grossHitch = (isFinite(pct) ? gvwr*(pct/100) : NaN);
 
-  if(elPayload) elPayload.textContent = fmtLb(payload);
-  if(elPct) elPct.textContent = (isFinite(pct) ? pct.toFixed(1) : "—") + "%";
-  if(elGross) elGross.textContent = (isFinite(grossHitch) ? fmtLb(grossHitch) : "—");
+  elPayload.textContent = fmtLb(payload);
+  elPct.textContent = (isFinite(pct) ? pct.toFixed(1) : "—") + "%";
+  elGross.textContent = (isFinite(grossHitch) ? fmtLb(grossHitch) : "—");
 }
 
 function bindTrailerForm(){
@@ -263,7 +265,7 @@ function bindTrailerForm(){
     $(id).addEventListener("input", ()=>{
       const tr=state.trailers.find(x=>x.id===selectedTrailerId); if(!tr) return;
       tr[key]=coerce($(id).value);
-      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed(); updateTrailerComputed();
+      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed();
     });
   });
 }
@@ -504,8 +506,7 @@ function bindCrud(){
   $("btnDelTruck").onclick=()=>{if(state.trucks.length<=1) return alert("Keep at least one truck."); state.trucks=state.trucks.filter(x=>x.id!==selectedTruckId); if(!state.trucks.find(x=>x.id===state.trip.truckId)) state.trip.truckId=state.trucks[0].id; selectedTruckId=state.trucks[0].id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();};
 
   $("btnNewTrailer").onclick=()=>{const tr={id:uuid(),name:"New trailer",dry:0,dryTongue:0,gvwr:0,freshCap:0}; state.trailers.unshift(tr); selectedTrailerId=tr.id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};
-  $("btnDupTrailer").onclick=()=>{const tr=state.trailers.find(x=>x.id===selectedTrailerId); if(!tr) return; const copy={...structuredClone(tr),id:uuid(),name:(tr.name||"Trailer")+" (copy)"}; state.trailers.unshift(copy); selectedTrailerId=copy.id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};
-  $("btnDelTrailer").onclick=()=>{if(state.trailers.length<=1) return alert("Keep at least one trailer."); state.trailers=state.trailers.filter(x=>x.id!==selectedTrailerId); if(!state.trailers.find(x=>x.id===state.trip.trailerId)) state.trip.trailerId=state.trailers[0].id; selectedTrailerId=state.trailers[0].id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};
+    $("btnDelTrailer").onclick=()=>{if(state.trailers.length<=1) return alert("Keep at least one trailer."); state.trailers=state.trailers.filter(x=>x.id!==selectedTrailerId); if(!state.trailers.find(x=>x.id===state.trip.trailerId)) state.trip.trailerId=state.trailers[0].id; selectedTrailerId=state.trailers[0].id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};
 }
 
 function bindBackup(){
