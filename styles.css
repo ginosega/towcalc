@@ -61,3 +61,19 @@ input:focus,select:focus{border-color:#3f7ec0}
 .warnItem.bad{border-color:rgba(255,92,92,0.45)}
 .warnItem.warn{border-color:rgba(255,204,102,0.45)}
 .warnTitle{font-weight:900;margin-bottom:4px}
+
+
+.calcblock{display:flex;flex-direction:column;gap:10px}
+.calcrow{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.calclabel{font-size:14px;line-height:1.2}
+.calcvalue{font-weight:700;font-size:16px;white-space:nowrap}
+
+.utilmeters{display:flex;flex-direction:column;gap:10px}
+.utilmeter{display:grid;grid-template-columns:1fr 72px;gap:10px;align-items:center}
+.utilmeter .bar{height:10px;border-radius:999px;background:rgba(0,0,0,0.08);overflow:hidden}
+.utilmeter .fill{height:100%;width:0%}
+.utilmeter .pct{font-variant-numeric:tabular-nums;text-align:right}
+.util-green .fill{background:rgba(34,197,94,0.9)}
+.util-yellow .fill{background:rgba(234,179,8,0.95)}
+.util-red .fill{background:rgba(239,68,68,0.95)}
+

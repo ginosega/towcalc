@@ -2,7 +2,8 @@
 const STORAGE_KEY="towcalc_state_v2";
 let tripDirty=false;
 function uuid(){ if(typeof crypto!=="undefined"&&crypto.randomUUID) return crypto.randomUUID();
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==="x"?r:(r&0x3|0x8);return v.toString(16);});
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==="x"?r:(r&0x3|0x8);return v.toString(16);  updateTrailerComputed();
+});
 }
 
 function defaultState(){
@@ -14,7 +15,7 @@ function defaultState(){
     {id:uuid(),name:"Apex Nano",dry:3495,dryTongue:370,gvwr:4700,freshCap:50},
   ];
   return {
-    settings:{waterLbPerGal:8.34,warnPct:90},
+    settings:{warnPct:90},
     trucks:[{id:truckId,name:"2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",gvwr:7350,gcwr:17000,payload:1391,maxTow:9650,maxTongue:1160,curb:0,rearGawr:4150,frontGawr:3900}],
     trailers,
     trip:{truckId, trailerId:trailers[0].id, presetId:"winter_boondock",
@@ -161,45 +162,6 @@ function pillClass(ok, util){
   return "ok";
 }
 
-function drawUtilChart(values, labels){
-  const canvas=$("utilChart"); if(!canvas) return;
-  const dpr=window.devicePixelRatio||1;
-  const ctx=canvas.getContext("2d");
-  const W=canvas.width=Math.max(320, canvas.clientWidth)*dpr;
-  const H=canvas.height=180*dpr;
-  ctx.clearRect(0,0,W,H);
-  const pad=12*dpr, maxY=140, labelH=18*dpr;
-  const chartW=W-pad*2, chartH=H-pad*2-labelH;
-
-  ctx.strokeStyle="rgba(167,177,189,0.25)";
-  ctx.fillStyle="rgba(167,177,189,0.65)";
-  ctx.lineWidth=1*dpr;
-  ctx.font=`${10*dpr}px system-ui`;
-  ctx.textAlign="left";
-  [0,50,90,100,140].forEach(yVal=>{
-    const yy=pad+chartH-(yVal/maxY)*chartH;
-    ctx.beginPath(); ctx.moveTo(pad,yy); ctx.lineTo(pad+chartW,yy); ctx.stroke();
-    ctx.fillText(`${yVal}%`, pad, yy-2*dpr);
-  });
-
-  const n=values.length, gap=8*dpr, barW=(chartW-gap*(n-1))/n;
-  for(let i=0;i<n;i++){
-    const v=Math.max(0,Math.min(200,values[i]));
-    const h=(Math.min(v,maxY)/maxY)*chartH;
-    const x=pad+i*(barW+gap);
-    const y=pad+chartH-h;
-    ctx.fillStyle="rgba(77,163,255,0.55)";
-    ctx.fillRect(x,y,barW,h);
-    if(v>maxY){
-      ctx.fillStyle="rgba(255,92,92,0.7)";
-      ctx.fillRect(x,pad,barW,6*dpr);
-    }
-    ctx.fillStyle="rgba(167,177,189,0.85)";
-    ctx.font=`${10*dpr}px system-ui`;
-    ctx.textAlign="center";
-    ctx.fillText(labels[i], x+barW/2, pad+chartH+14*dpr);
-  }
-}
 
 let selectedTruckId=null, selectedTrailerId=null;
 function ensureSelections(){ if(!selectedTruckId&&state.trucks[0]) selectedTruckId=state.trucks[0].id; if(!selectedTrailerId&&state.trailers[0]) selectedTrailerId=state.trailers[0].id; }
@@ -249,6 +211,7 @@ function renderTruckForm(){
   $("truckFrontGawr").value=t.frontGawr||0;
 }
 function renderTrailerForm(){
+
   const tr=state.trailers.find(x=>x.id===selectedTrailerId)||state.trailers[0]; if(!tr) return;
   $("trailerName").value=tr.name||"";
   $("trailerDry").value=tr.dry||0;
@@ -263,17 +226,37 @@ function bindTruckForm(){
     $(id).addEventListener("input", ()=>{
       const t=state.trucks.find(x=>x.id===selectedTruckId); if(!t) return;
       t[key]=coerce($(id).value);
-      saveState(); syncTripSelectors(); renderResults();
+      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed();
     });
   });
 }
+
+function updateTrailerComputed(){
+  const tr = state.trailers.find(t=>t.id===state.ui.editTrailerId) || null;
+  if(!tr) return;
+  const dry = +tr.dry||0;
+  const gvwr = +tr.gvwr||0;
+  const tongue = +tr.tongue||0;
+
+  const payload = gvwr - dry;
+  const pct = (dry>0) ? (tongue/dry*100) : NaN;
+  const grossHitch = (isFinite(pct) ? gvwr*(pct/100) : NaN);
+
+  const elPayload = $("trCalcPayload");
+  const elPct = $("trCalcDryTonguePct");
+  const elGross = $("trCalcGrossHitch");
+  if(elPayload) elPayload.textContent = fmtLb(payload);
+  if(elPct) elPct.textContent = (isFinite(pct) ? pct.toFixed(1) : "—") + "%";
+  if(elGross) elGross.textContent = (isFinite(grossHitch) ? fmtLb(grossHitch) : "—");
+}
+
 function bindTrailerForm(){
   const fields=[["trailerName","name",v=>v],["trailerDry","dry",num],["trailerDryTongue","dryTongue",num],["trailerGVWR","gvwr",num],["trailerFreshCap","freshCap",num]];
   fields.forEach(([id,key,coerce])=>{
     $(id).addEventListener("input", ()=>{
       const tr=state.trailers.find(x=>x.id===selectedTrailerId); if(!tr) return;
       tr[key]=coerce($(id).value);
-      saveState(); syncTripSelectors(); renderResults();
+      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed();
     });
   });
 }
@@ -403,10 +386,44 @@ function bindTrip(){
 }
 
 function bindSettings(){
-  $("waterLbPerGal").value=state.settings.waterLbPerGal;
   $("warnPct").value=state.settings.warnPct;
-  $("waterLbPerGal").addEventListener("input",e=>{state.settings.waterLbPerGal=num(e.target.value); saveState(); markTripDirty();});
+  saveState(); markTripDirty();});
   $("warnPct").addEventListener("input",e=>{state.settings.warnPct=clamp(num(e.target.value),50,100); saveState(); markTripDirty();});
+}
+
+
+function clampPct(x){ return Math.max(0, Math.min(200, x)); }
+function utilClass(pct){
+  if(pct >= 100) return "util-red";
+  if(pct >= 90) return "util-yellow";
+  return "util-green";
+}
+function renderUtilMeters(r){
+  const box = $("utilChart");
+  if(!box) return;
+  const items = [
+    { key:"Payload", used:r.payloadUsedHigh, limit:r.payloadCap },
+    { key:"Tongue", used:r.tongueHigh, limit:r.truckTongueCap },
+    { key:"Tow", used:r.loadedTrailer, limit:r.truckTowCap },
+    { key:"Trailer GVWR", used:r.loadedTrailer, limit:r.trailerGvwr },
+    { key:"Truck GVWR", used:r.estTruckWeightHigh, limit:r.truckGvwr },
+    { key:"GCWR", used:r.estGCWHigh, limit:r.truckGcwr },
+  ].filter(x => x.limit && x.limit > 0);
+
+  box.innerHTML = `<div class="utilmeters">
+    ${items.map(it=>{
+      const pct = clampPct((it.used/it.limit)*100);
+      const cls = utilClass(pct);
+      const w = Math.min(100, pct);
+      return `<div class="utilmeter ${cls}">
+        <div>
+          <div class="small"><b>${it.key}</b> <span class="muted">${fmtLb(it.used)} / ${fmtLb(it.limit)}</span></div>
+          <div class="bar"><div class="fill" style="width:${w}%;"></div></div>
+        </div>
+        <div class="pct">${pct.toFixed(0)}%</div>
+      </div>`;
+    }).join("")}
+  </div>`;
 }
 
 function renderResults(){
