@@ -1,14 +1,10 @@
 
 const STORAGE_KEY="towcalc_state_v2";
+const PROFILES_KEY="towcalc_trip_profiles_v1";
+let tripDirty=false;
 function uuid(){ if(typeof crypto!=="undefined"&&crypto.randomUUID) return crypto.randomUUID();
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==="x"?r:(r&0x3|0x8);return v.toString(16);});
 }
-const presets=[
-{id:"summer_hookups",name:"Summer • Hookups",tripPatch:{truckGear:180,wdh:80,trailerGear:700,waterLb:41.7,propaneLb:40,battLb:120,twMode:"range",twLowPct:11.5,twHighPct:13.5}},
-{id:"summer_boondock",name:"Summer • Boondock",tripPatch:{truckGear:220,wdh:85,trailerGear:950,waterLb:250.2,propaneLb:40,battLb:120,twMode:"range",twLowPct:12.0,twHighPct:14.5}},
-{id:"winter_hookups",name:"Winter • Hookups",tripPatch:{truckGear:260,wdh:85,trailerGear:950,waterLb:41.7,propaneLb:60,battLb:120,twMode:"range",twLowPct:12.5,twHighPct:15.0}},
-{id:"winter_boondock",name:"Winter • Boondock (Ski lot)",tripPatch:{truckGear:320,wdh:90,trailerGear:1200,waterLb:166.8,propaneLb:60,battLb:120,twMode:"range",twLowPct:13.0,twHighPct:15.5}},
-];
 
 function defaultState(){
   const truckId=uuid();
@@ -37,6 +33,54 @@ const sum=a=>a.reduce((x,y)=>x+y,0);
 const fmtLb=x=>Math.round(x).toLocaleString()+" lb";
 const fmtPct=x=>(Math.round(x*10)/10).toFixed(1)+"%";
 function escapeHtml(s){return String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
+
+function markTripDirty(){
+  tripDirty = true;
+  const note = $("pendingNote");
+  if(note) note.classList.remove("hidden");
+}
+function clearTripDirty(){
+  tripDirty = false;
+  const note = $("pendingNote");
+  if(note) note.classList.add("hidden");
+}
+function loadProfiles(){
+  try{ return JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}"); }catch{ return {}; }
+}
+function saveProfiles(obj){
+  localStorage.setItem(PROFILES_KEY, JSON.stringify(obj));
+}
+function tripSnapshot(){
+  const t = state.trip;
+  return {
+    truckId: t.truckId,
+    trailerId: t.trailerId,
+    twMode: t.twMode,
+    twFixedPct: t.twFixedPct,
+    twLowPct: t.twLowPct,
+    twHighPct: t.twHighPct,
+    truckLoads: structuredClone(t.truckLoads || []),
+    trailerLoads: structuredClone(t.trailerLoads || [])
+  };
+}
+function applyTripSnapshot(snap){
+  state.trip.truckId = snap.truckId;
+  state.trip.trailerId = snap.trailerId;
+  state.trip.twMode = snap.twMode;
+  state.trip.twFixedPct = snap.twFixedPct;
+  state.trip.twLowPct = snap.twLowPct;
+  state.trip.twHighPct = snap.twHighPct;
+  state.trip.truckLoads = structuredClone(snap.truckLoads || []);
+  state.trip.trailerLoads = structuredClone(snap.trailerLoads || []);
+  saveState();
+  renderTrip();
+  markTripDirty();
+}
+function activateTab(tabId){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active", b.dataset.tab===tabId));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active", p.id===tabId));
+}
+
 
 function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
 function hydrate(s){
@@ -302,7 +346,7 @@ function renderTruckLoads(){
       if(state.trip.truckLoads.length===0){
         state.trip.truckLoads = [{ id: uuid(), name:"Load", weight:0 }];
       }
-      saveState(); renderTruckLoads(); renderResults();
+      saveState(); renderTruckLoads(); markTripDirty();
     };
     row.querySelector(".truckLoadName").oninput = (e)=>{
       const id = e.target.dataset.id;
@@ -312,7 +356,7 @@ function renderTruckLoads(){
     row.querySelector(".truckLoadWeight").oninput = (e)=>{
       const id = e.target.dataset.id;
       const obj = state.trip.truckLoads.find(x=>x.id===id);
-      if(obj){ obj.weight = num(e.target.value); saveState(); renderResults(); }
+      if(obj){ obj.weight = num(e.target.value); saveState(); markTripDirty(); }
     };
     box.appendChild(row);
   });
@@ -337,79 +381,42 @@ function renderTrailerLoads(){
       if(state.trip.trailerLoads.length===0){
         state.trip.trailerLoads = [{ id: uuid(), name:"Load", weight:0 }];
       }
-      saveState(); renderTrailerLoads(); renderResults();
+      saveState(); renderTrailerLoads(); markTripDirty();
     };
     row.querySelector(".trailerLoadName").oninput = (e)=>{
       const id = e.target.dataset.id;
       const obj = state.trip.trailerLoads.find(x=>x.id===id);
-      if(obj){ obj.name = e.target.value; saveState(); renderResults(); }
+      if(obj){ obj.name = e.target.value; saveState(); markTripDirty(); }
     };
     row.querySelector(".trailerLoadWeight").oninput = (e)=>{
       const id = e.target.dataset.id;
       const obj = state.trip.trailerLoads.find(x=>x.id===id);
-      if(obj){ obj.weight = num(e.target.value); saveState(); renderResults(); }
+      if(obj){ obj.weight = num(e.target.value); saveState(); markTripDirty(); }
     };
     box.appendChild(row);
   });
 }
 
 function renderTrip(){
-  const selPreset=$("tripPreset"); selPreset.innerHTML="";
-  presets.forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;selPreset.appendChild(o);});
-  selPreset.value=state.trip.presetId;
   $("twMode").value=state.trip.twMode;
   $("twFixedPct").value=state.trip.twFixedPct;
   $("twLowPct").value=state.trip.twLowPct;
   $("twHighPct").value=state.trip.twHighPct;
   showTongueBoxes();
-
-            renderTruckLoads();
+  renderTruckLoads();
   renderTrailerLoads();
 }
 
 function bindTrip(){
-  $("tripTruck").addEventListener("change",e=>{state.trip.truckId=e.target.value; saveState(); renderResults();});
-  $("tripTrailer").addEventListener("change",e=>{state.trip.trailerId=e.target.value; saveState(); renderResults();});
-  $("tripPreset").addEventListener("change",e=>{state.trip.presetId=e.target.value; saveState();});
-
-  $("btnApplyPreset").onclick=()=>{
-    const p=presets.find(x=>x.id===state.trip.presetId); if(!p) return;
-    const patch=p.tripPatch||{};
-    Object.keys(patch).forEach(k=>{
-      if(k==="truckGear"||k==="wdh") return;
-      state.trip[k]=patch[k];
-    });
-    if(!Array.isArray(state.trip.truckLoads)) state.trip.truckLoads=[];
-    const upsert=(name, weight)=>{
-      let row=state.trip.truckLoads.find(x=>(x.name||"")===name);
-      if(!row){ row={id:uuid(),name,weight}; state.trip.truckLoads.push(row); }
-      else { row.weight=weight; }
-    };
-    if(Number.isFinite(+patch.wdh)) upsert("WDH", +patch.wdh);
-    if(Number.isFinite(+patch.truckGear)) upsert("Trip gear", +patch.truckGear);
-
-    // upsert common trailer load rows
-    if(!Array.isArray(state.trip.trailerLoads)) state.trip.trailerLoads = [];
-    const upsertTrailer=(name, weight)=>{
-      let row=state.trip.trailerLoads.find(x=>(x.name||"")===name);
-      if(!row){ row={id:uuid(),name,weight}; state.trip.trailerLoads.push(row); }
-      else { row.weight=weight; }
-    };
-    if(Number.isFinite(+patch.trailerGear)) upsertTrailer("Cargo", +patch.trailerGear);
-    if(Number.isFinite(+patch.waterLb)) upsertTrailer("Fresh water", +patch.waterLb);
-    if(Number.isFinite(+patch.propaneLb)) upsertTrailer("Propane", +patch.propaneLb);
-    if(Number.isFinite(+patch.battLb)) upsertTrailer("Batteries", +patch.battLb);
-
-    saveState(); renderTrip(); renderResults();
-  };
-  $("btnRecalc").onclick=()=>renderResults();
+  $("tripTruck").addEventListener("change",e=>{state.trip.truckId=e.target.value; saveState(); markTripDirty();});
+  $("tripTrailer").addEventListener("change",e=>{state.trip.trailerId=e.target.value; saveState(); markTripDirty();});
 
   const btnAdd = $("btnAddLoad");
   if(btnAdd){
     btnAdd.onclick = ()=>{
       if(!Array.isArray(state.trip.truckLoads)) state.trip.truckLoads = [];
       state.trip.truckLoads.push({ id: uuid(), name:"Load", weight:0 });
-      saveState(); renderTruckLoads(); renderResults();
+      saveState(); renderTruckLoads(); markTripDirty();
     };
   }
 
@@ -418,26 +425,21 @@ function bindTrip(){
     btnAddTrailer.onclick = ()=>{
       if(!Array.isArray(state.trip.trailerLoads)) state.trip.trailerLoads = [];
       state.trip.trailerLoads.push({ id: uuid(), name:"Load", weight:0 });
-      saveState(); renderTrailerLoads(); renderResults();
+      saveState(); renderTrailerLoads(); markTripDirty();
     };
   }
 
-  $("twMode").addEventListener("change",e=>{state.trip.twMode=e.target.value; showTongueBoxes(); saveState(); renderResults();});
-  $("twFixedPct").addEventListener("input",e=>{state.trip.twFixedPct=num(e.target.value); saveState(); renderResults();});
-  $("twLowPct").addEventListener("input",e=>{state.trip.twLowPct=num(e.target.value); saveState(); renderResults();});
-  $("twHighPct").addEventListener("input",e=>{state.trip.twHighPct=num(e.target.value); saveState(); renderResults();});
-
-  const bindNum=(id,key)=>$(id).addEventListener("input",e=>{state.trip[key]=num(e.target.value); saveState(); renderResults();});
-  [] .forEach(k=>bindNum(k,k));
-
-  
+  $("twMode").addEventListener("change",e=>{state.trip.twMode=e.target.value; showTongueBoxes(); saveState(); markTripDirty();});
+  $("twFixedPct").addEventListener("input",e=>{state.trip.twFixedPct=num(e.target.value); saveState(); markTripDirty();});
+  $("twLowPct").addEventListener("input",e=>{state.trip.twLowPct=num(e.target.value); saveState(); markTripDirty();});
+  $("twHighPct").addEventListener("input",e=>{state.trip.twHighPct=num(e.target.value); saveState(); markTripDirty();});
 }
 
 function bindSettings(){
   $("waterLbPerGal").value=state.settings.waterLbPerGal;
   $("warnPct").value=state.settings.warnPct;
-  $("waterLbPerGal").addEventListener("input",e=>{state.settings.waterLbPerGal=num(e.target.value); saveState(); renderResults();});
-  $("warnPct").addEventListener("input",e=>{state.settings.warnPct=clamp(num(e.target.value),50,100); saveState(); renderResults();});
+  $("waterLbPerGal").addEventListener("input",e=>{state.settings.waterLbPerGal=num(e.target.value); saveState(); markTripDirty();});
+  $("warnPct").addEventListener("input",e=>{state.settings.warnPct=clamp(num(e.target.value),50,100); saveState(); markTripDirty();});
 }
 
 function renderResults(){
@@ -548,6 +550,91 @@ function bindBackup(){
   };
 }
 
+
+function renderProfileList(){
+  const sel = $("profileList");
+  if(!sel) return;
+  const profiles = loadProfiles();
+  const names = Object.keys(profiles).sort((a,b)=>a.localeCompare(b));
+  sel.innerHTML="";
+  const placeholder = document.createElement("option");
+  placeholder.value="";
+  placeholder.textContent = names.length ? "Select a profile…" : "No saved profiles";
+  sel.appendChild(placeholder);
+  names.forEach(n=>{
+    const o=document.createElement("option");
+    o.value=n; o.textContent=n;
+    sel.appendChild(o);
+  });
+}
+
+function bindProfiles(){
+  renderProfileList();
+  const msg = $("profileMsg");
+  const setMsg = (t)=>{ if(msg) msg.textContent=t||""; };
+
+  const btnSave = $("btnSaveProfile");
+  const btnLoad = $("btnLoadProfile");
+  const btnDel  = $("btnDeleteProfile");
+  const nameIn  = $("profileName");
+  const listSel = $("profileList");
+
+  if(listSel && nameIn){
+    listSel.addEventListener("change", e=>{
+      const n=e.target.value;
+      if(n){ nameIn.value=n; }
+    });
+  }
+
+  if(btnSave){
+    btnSave.onclick = ()=>{
+      const name = (nameIn?.value||"").trim();
+      if(!name){ setMsg("Enter a profile name to save."); return; }
+      const profiles = loadProfiles();
+      profiles[name] = tripSnapshot();
+      saveProfiles(profiles);
+      renderProfileList();
+      setMsg(`Saved "${name}".`);
+    };
+  }
+  if(btnLoad){
+    btnLoad.onclick = ()=>{
+      const name = (nameIn?.value||listSel?.value||"").trim();
+      if(!name){ setMsg("Choose a profile to load."); return; }
+      const profiles = loadProfiles();
+      const snap = profiles[name];
+      if(!snap){ setMsg(`No profile named "${name}".`); return; }
+      if(!confirm(`Load profile "${name}"? This will replace current Trip tab values.`)) return;
+      applyTripSnapshot(snap);
+      setMsg(`Loaded "${name}".`);
+    };
+  }
+  if(btnDel){
+    btnDel.onclick = ()=>{
+      const name = (nameIn?.value||listSel?.value||"").trim();
+      if(!name){ setMsg("Choose a profile to delete."); return; }
+      const profiles = loadProfiles();
+      if(!profiles[name]){ setMsg(`No profile named "${name}".`); return; }
+      if(!confirm(`Delete profile "${name}"?`)) return;
+      delete profiles[name];
+      saveProfiles(profiles);
+      renderProfileList();
+      if(nameIn) nameIn.value="";
+      setMsg(`Deleted "${name}".`);
+    };
+  }
+}
+
+function bindCalculate(){
+  const btn = $("btnCalculate");
+  if(!btn) return;
+  btn.onclick = ()=>{
+    clearTripDirty();
+    renderResults();
+    activateTab("tab-results");
+  };
+}
+
 function boot(rerender=false){
   ensureSelections();
   if(!selectedTruckId) selectedTruckId=state.trucks[0]?.id||null;
@@ -567,6 +654,8 @@ function boot(rerender=false){
   bindTruckForm();
   bindTrailerForm();
   bindTrip();
+  bindProfiles();
+  bindCalculate();
   bindCrud();
   bindBackup();
 

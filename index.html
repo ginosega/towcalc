@@ -68,6 +68,24 @@
       </div>
 
       <div class="grid2">
+<div class="card">
+  <h3>Trip profile</h3>
+  <div class="form">
+    <label>Profile name
+      <input id="profileName" type="text" placeholder="e.g., Winter ski trip"/>
+    </label>
+    <label>Saved profiles
+      <select id="profileList"></select>
+    </label>
+    <div class="row">
+      <button id="btnSaveProfile" class="btn btn-primary">Save profile</button>
+      <button id="btnLoadProfile" class="btn btn-secondary">Load</button>
+      <button id="btnDeleteProfile" class="btn btn-danger">Delete</button>
+    </div>
+    <div id="profileMsg" class="muted small"></div>
+  </div>
+</div>
+
         <div class="card">
           <h3>Selections</h3>
           <div class="form">
@@ -77,14 +95,7 @@
             <label>Trailer
               <select id="tripTrailer"></select>
             </label>
-            <label>Preset
-              <select id="tripPreset"></select>
-            </label>
-            <div class="row">
-              <button id="btnApplyPreset" class="btn btn-primary">Apply preset</button>
-              <button id="btnRecalc" class="btn btn-secondary">Recalculate</button>
-            </div>
-            <div class="muted small">Tip: Use <b>Range %</b> tongue mode for realistic planning (e.g., 12–15%).
+<div class="muted small">Tip: Use <b>Range %</b> tongue mode for realistic planning (e.g., 12–15%).
             <hr/>
             <h4>Tongue weight model</h4>
 
@@ -141,6 +152,15 @@
           </div>
         </div>
       </div>
+
+<div class="card">
+  <h3>Commit changes</h3>
+  <div class="form">
+    <div id="pendingNote" class="muted small hidden">Edits pending — press Calculate to update results.</div>
+    <button id="btnCalculate" class="btn btn-primary">Calculate</button>
+  </div>
+</div>
+
     </section>
 
     <section id="tab-trucks" class="panel">
