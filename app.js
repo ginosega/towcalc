@@ -387,7 +387,6 @@ function bindTrip(){
 
 function bindSettings(){
   $("warnPct").value=state.settings.warnPct;
-  saveState(); markTripDirty();});
   $("warnPct").addEventListener("input",e=>{state.settings.warnPct=clamp(num(e.target.value),50,100); saveState(); markTripDirty();});
 }
 
