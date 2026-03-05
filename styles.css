@@ -83,3 +83,80 @@ input:focus,select:focus{border-color:#3f7ec0}
 .readonly{margin-top:6px;padding:10px 12px;border:1px solid rgba(255,255,255,0.18);border-radius:12px;background:rgba(255,255,255,0.04);color:inherit;font-size:16px;line-height:1.2;font-variant-numeric:tabular-nums}
 
 .btnRow button{font-size:16px;}
+
+
+
+/* === UI Scrub v29: clean modern cards (overrides only) === */
+:root{
+  --radius-lg:18px;
+  --radius-md:14px;
+  --pad-card:14px;
+  --gap-sm:8px;
+  --gap-md:12px;
+  --gap-lg:16px;
+}
+
+/* Typography hierarchy */
+.panel-head h2{font-size:20px;letter-spacing:-0.2px}
+.card h3{font-size:16px;letter-spacing:-0.15px}
+label{font-size:13px}
+label .muted, label .fw-normal{font-weight:600;font-size:12px}
+.muted.small{font-size:12px}
+
+/* Cards & spacing */
+.container{padding:16px}
+.grid2{gap:14px}
+.card{border-radius:var(--radius-lg);padding:var(--pad-card)}
+.form{gap:12px}
+.row{gap:12px}
+hr{margin:16px 0}
+
+/* Inputs */
+input,select{padding:11px 12px;border-radius:14px;min-height:42px}
+input::placeholder{color:rgba(167,177,189,0.7)}
+.readonly{min-height:42px;display:flex;align-items:center}
+
+/* Buttons */
+.btn{min-height:42px;border-radius:14px}
+.btnRow{display:flex;gap:10px;flex-wrap:wrap}
+.btnRow .btn, .btnRow button{font-size:15px}
+
+/* Lists: normalize both legacy (.item) and newer (.listItem/.listBtn) */
+.list{gap:10px}
+.item, .listItem{
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:10px 10px;
+  background:rgba(18,21,26,0.65);
+}
+.item.active, .listBtn.active{border-color:#4a83b6;background:rgba(77,163,255,0.10)}
+
+.listBtn{
+  width:100%;
+  text-align:left;
+  border:0;
+  background:transparent;
+  color:var(--text);
+  padding:0;
+  cursor:pointer;
+}
+.listActions{display:flex;gap:8px;align-items:center}
+.listItem{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.listItem .muted.small{margin-top:4px}
+
+/* Warnings */
+.warnItem{border-radius:16px}
+.warnTitle{letter-spacing:-0.1px}
+
+/* Utilization meters */
+.utilmeter{grid-template-columns:1fr 64px}
+.utilmeter .pct{font-size:12px}
+.utilmeter .bar{height:12px}
+
+/* Mobile comfort */
+@media (max-width:520px){
+  .tabs{overflow:auto}
+  .tab{white-space:nowrap}
+  .cards{grid-template-columns:1fr}
+}
+
