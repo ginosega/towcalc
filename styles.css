@@ -163,3 +163,7 @@ input::placeholder{color:rgba(167,177,189,0.7)}
 
 /* Top-level section spacing */
 .panel > * + * { margin-top: 14px; }
+
+.btnRow.actions{margin-top:12px}
+
+.form label span{font-size:13px}

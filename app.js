@@ -564,7 +564,7 @@ if((+r.truck.ballRating||0)>0 && r.tongueHigh>(+r.truck.ballRating||0)) w.push({
   if(!r.trailerGvwrOk) w.push({level:"bad",title:"Over trailer GVWR",msg:`Trailer weight ${fmtLb(r.loadedTrailer)} exceeds trailer GVWR ${fmtLb(r.tr.gvwr||0)}.`});
   else if(r.utilization.trailerGvwr>=warnPct) w.push({level:"warn",title:"Trailer GVWR near limit",msg:`Trailer weight is ${(r.utilization.trailerGvwr*100).toFixed(1)}% of GVWR.`});
 
-  if(!r.gvwrOk) w.push({level:"bad",title:"Over truck GVWR (estimated)",msg:`Truck est ${fmtLb(r.estTruckWeightHigh)} exceeds GVWR ${fmtLb(r.truck.gvwr||0)}.`});
+  if(!r.gvwrOk) w.push({level:"bad",title:"Over truck weight",msg:`Truck est ${fmtLb(r.estTruckWeightHigh)} exceeds GVWR ${fmtLb(r.truck.gvwr||0)}.`});
   else if(r.utilization.gvwr>=warnPct) w.push({level:"warn",title:"Truck GVWR near limit",msg:`Truck is ${(r.utilization.gvwr*100).toFixed(1)}% of GVWR.`});
 
   if(!r.gcwrOk) w.push({level:"bad",title:"Over GCWR (estimated)",msg:`Combined est ${fmtLb(r.gcwrHigh)} exceeds GCWR ${fmtLb(r.truck.gcwr||0)}.`});
