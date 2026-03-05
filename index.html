@@ -90,7 +90,7 @@
 
             <div id="twFixed" class="twbox hidden">
               <label>Loaded tongue %
-                <input id="twFixedPct" type="number" step="0.1" min="5" max="25"/>
+                <input id="twFixedPct" type="number" step="0.1" min="5" max="25"/ inputmode="numeric" class="num">
               </label>
               <div id="dryRatioHint" class="muted small"></div>
               <div class="muted small">Typical travel trailers often land around 12–15% when loaded.</div>
@@ -99,10 +99,10 @@
             <div id="twRange" class="twbox hidden">
               <div class="row">
                 <label>Low %
-                  <input id="twLowPct" type="number" step="0.1" min="5" max="25"/>
+                  <input id="twLowPct" type="number" step="0.1" min="5" max="25"/ inputmode="numeric" class="num">
                 </label>
                 <label>High %
-                  <input id="twHighPct" type="number" step="0.1" min="5" max="25"/>
+                  <input id="twHighPct" type="number" step="0.1" min="5" max="25"/ inputmode="numeric" class="num">
                 </label>
               </div>
               <div class="muted small">Warnings are based on the high end of the range.</div>
@@ -168,52 +168,52 @@
 
             <div class="row">
               <label>GVWR (lbs)
-                <input id="truckGVWR" type="number" step="1" min="0"/>
+                <input id="truckGVWR" type="number" step="1" min="0"/ inputmode="numeric" class="num">
               </label>
               <label>GCWR (lbs)
-                <input id="truckGCWR" type="number" step="1" min="0"/>
+                <input id="truckGCWR" type="number" step="1" min="0"/ inputmode="numeric" class="num">
               </label>
             </div>
 
             <div class="row">
               <label>Payload (lbs)
-                <input id="truckPayload" type="number" step="1" min="0"/>
+                <input id="truckPayload" type="number" step="1" min="0"/ inputmode="numeric" class="num">
               </label>
               <label>Towing capacity (lbs)
-                <input id="truckTow" type="number" step="1" min="0"/>
+                <input id="truckTow" type="number" step="1" min="0"/ inputmode="numeric" class="num">
               </label>
             </div>
 
             <div class="row">
-              <label><b>Max tongue weight (lbs)</b> <span class="muted">w/weight distributing hitch</span><input id="truckTongue" type="number" step="1" min="0"/>
+              <label><b>Max tongue weight (lbs)</b> <span class="muted">w/weight distributing hitch</span><input id="truckTongue" type="number" step="1" min="0"/ inputmode="numeric" class="num">
               </label>
               <label>Curb weight (optional) (lbs)
-                <input id="truckCurb" type="number" step="1" min="0"/>
+                <input id="truckCurb" type="number" step="1" min="0"/ inputmode="numeric" class="num">
               </label>
             </div>
 
             <div class="row">
               <label>Rear GAWR (lbs)
-                <input id="truckRearGawr" type="number" step="1" min="0"/>
+                <input id="truckRearGawr" type="number" step="1" min="0"/ inputmode="numeric" class="num">
               </label>
               <label>Front GAWR (lbs)
-                <input id="truckFrontGawr" type="number" step="1" min="0"/>
+                <input id="truckFrontGawr" type="number" step="1" min="0"/ inputmode="numeric" class="num">
               </label>
             </div><div class="row">
   <label>Hitch receiver rating (lbs)
-    <input id="truckReceiverRating" type="number" step="1" min="0"/>
+    <input id="truckReceiverRating" type="number" step="1" min="0"/ inputmode="numeric" class="num">
   </label>
   <label>Hitch rating (lbs)
-    <input id="truckHitchRating" type="number" step="1" min="0"/>
+    <input id="truckHitchRating" type="number" step="1" min="0"/ inputmode="numeric" class="num">
   </label>
 </div>
 
 <div class="row">
   <label>Hitch ball rating (lbs)
-    <input id="truckBallRating" type="number" step="1" min="0"/>
+    <input id="truckBallRating" type="number" step="1" min="0"/ inputmode="numeric" class="num">
   </label>
   <label>Tire weight rating (lbs)
-    <input id="truckTireRating" type="number" step="1" min="0"/>
+    <input id="truckTireRating" type="number" step="1" min="0"/ inputmode="numeric" class="num">
   </label>
 </div>
 
@@ -250,19 +250,19 @@
 
     <div class="row">
       <label>Dry weight (lbs)
-        <input id="trailerDry" type="number" step="1" min="0"/>
+        <input id="trailerDry" type="number" step="1" min="0"/ inputmode="numeric" class="num">
       </label>
       <label>Dry tongue (lbs)
-        <input id="trailerDryTongue" type="number" step="1" min="0"/>
+        <input id="trailerDryTongue" type="number" step="1" min="0"/ inputmode="numeric" class="num">
       </label>
     </div>
 
     <div class="row">
       <label>GVWR (lbs)
-        <input id="trailerGVWR" type="number" step="1" min="0"/>
+        <input id="trailerGVWR" type="number" step="1" min="0"/ inputmode="numeric" class="num">
       </label>
       <label><span style="font-weight:700">Fresh water capacity (gal)</span> <span class="muted fw-normal">8.34 lbs/gal</span>
-        <input id="trailerFreshCap" type="number" step="0.5" min="0"/>
+        <input id="trailerFreshCap" type="number" step="0.5" min="0"/ inputmode="numeric" class="num">
       </label>
     </div>
 
@@ -295,7 +295,7 @@
           <h3>General</h3>
           <div class="form">
 <label>Warn at utilization (%)
-              <input id="warnPct" type="number" step="1" min="50" max="100"/>
+              <input id="warnPct" type="number" step="1" min="50" max="100"/ inputmode="numeric" class="num">
             </label>
             <div class="muted small">Warnings fire when a limit exceeds this percent.</div>
           </div>

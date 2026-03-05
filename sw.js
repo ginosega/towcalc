@@ -1,4 +1,4 @@
-const CACHE = "towcalc-cache-v29";
+const CACHE = "towcalc-cache-v30";
 const ASSETS = [
   "./",
   "./index.html",

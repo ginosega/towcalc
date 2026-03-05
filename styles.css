@@ -174,3 +174,5 @@ input::placeholder{color:rgba(167,177,189,0.7)}
 .form label > span{font-size:13px;line-height:1.2}
 .form label > span.muted{font-size:12px;font-weight:400}
 .form label > span.fw-normal{font-weight:400}
+
+input.num{text-align:right;font-variant-numeric:tabular-nums}

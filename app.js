@@ -32,6 +32,18 @@ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const sum=a=>a.reduce((x,y)=>x+y,0);
 const fmtLb=x=>Math.round(x).toLocaleString()+" lb";
 const fmtPct=x=>(Math.round(x*10)/10).toFixed(1)+"%";
+
+function setEmptyState(box, msg){
+  if(!box) return;
+  if(!box.children.length){
+    const d=document.createElement("div");
+    d.className="muted small";
+    d.style.padding="10px 6px";
+    d.textContent=msg;
+    box.appendChild(d);
+  }
+}
+
 function escapeHtml(s){return String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
 
 function markTripDirty(){
@@ -196,6 +208,9 @@ function renderLists(){
     div.onclick=()=>{selectedTrailerId=tr.id; renderLists(); renderTrailerForm(); updateTrailerComputed(); syncTripSelectors(); saveState();};
     listT.appendChild(div);
   });
+  setEmptyState($('truckList'), 'No trucks yet. Click “New truck” to add one.');
+  setEmptyState($('trailerList'), 'No trailers yet. Click “New trailer” to add one.');
+
 }
 
 function renderTruckForm(){
@@ -586,10 +601,14 @@ if((+r.truck.ballRating||0)>0 && r.tongueHigh>(+r.truck.ballRating||0)) w.push({
 
 function bindCrud(){
   $("btnNewTruck").onclick=()=>{const t={id:uuid(),name:"New truck",gvwr:0,gcwr:0,payload:0,maxTow:0,maxTongue:0,curb:0,rearGawr:0,frontGawr:0}; state.trucks.unshift(t); selectedTruckId=t.id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();};
-    $("btnDelTruck").onclick=()=>{if(state.trucks.length<=1) return alert("Keep at least one truck."); state.trucks=state.trucks.filter(x=>x.id!==selectedTruckId); if(!state.trucks.find(x=>x.id===state.trip.truckId)) state.trip.truckId=state.trucks[0].id; selectedTruckId=state.trucks[0].id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();};
+    $("btnDelTruck").onclick=()=>{
+  const t=state.trucks.find(x=>x.id===state.ui.editTruckId);
+  if(!confirm(`Delete truck "${(t&&t.name)||"Truck"}"?`)) return;if(state.trucks.length<=1) return alert("Keep at least one truck."); state.trucks=state.trucks.filter(x=>x.id!==selectedTruckId); if(!state.trucks.find(x=>x.id===state.trip.truckId)) state.trip.truckId=state.trucks[0].id; selectedTruckId=state.trucks[0].id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();};
 
   $("btnNewTrailer").onclick=()=>{const tr={id:uuid(),name:"New trailer",dry:0,dryTongue:0,gvwr:0,freshCap:0}; state.trailers.unshift(tr); selectedTrailerId=tr.id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};
-    $("btnDelTrailer").onclick=()=>{if(state.trailers.length<=1) return alert("Keep at least one trailer."); state.trailers=state.trailers.filter(x=>x.id!==selectedTrailerId); if(!state.trailers.find(x=>x.id===state.trip.trailerId)) state.trip.trailerId=state.trailers[0].id; selectedTrailerId=state.trailers[0].id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};
+    $("btnDelTrailer").onclick=()=>{
+  const t=state.trailers.find(x=>x.id===state.ui.editTrailerId);
+  if(!confirm(`Delete trailer "${(t&&t.name)||"Trailer"}"?`)) return;if(state.trailers.length<=1) return alert("Keep at least one trailer."); state.trailers=state.trailers.filter(x=>x.id!==selectedTrailerId); if(!state.trailers.find(x=>x.id===state.trip.trailerId)) state.trip.trailerId=state.trailers[0].id; selectedTrailerId=state.trailers[0].id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};
 }
 
 function bindBackup(){
