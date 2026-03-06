@@ -18,7 +18,7 @@ function defaultState(){
     trucks:[{id:truckId,name:"2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",gvwr:7350,gcwr:17000,payload:1391,maxTow:9650,maxTongue:1160,curb:0,rearGawr:4150,frontGawr:3900,receiverRating:0,hitchRating:0,ballRating:0,tireRating:0}],
     trailers,
     trip:{truckId, trailerId:trailers[0].id,
-      truckLoads:[{id:uuid(),name:"Gino",weight:180},{id:uuid(),name:"Cristina",weight:150},{id:uuid(),name:"Jacob",weight:120},{id:uuid(),name:"WDH",weight:90}],
+      truckLoads:[{id:uuid(),name:"Driver",weight:180},{id:uuid(),name:"Passenger",weight:150},{id:uuid(),name:"Passenger",weight:120}],
       twFixedPct:12.5
     }
   };
@@ -100,15 +100,14 @@ function hydrate(s){
     });
     delete s.trip.passengers;
   }
-  if(!Array.isArray(s.trip.truckLoads) || s.trip.truckLoads.length===0){
-    const hitch = Number.isFinite(+s.trip.hitchHardware) ? +s.trip.hitchHardware : 0;
-    s.trip.truckLoads = [
-      { id: uuid(), name:"Gino", weight:180 },
-      { id: uuid(), name:"Cristina", weight:150 },
-      { id: uuid(), name:"Jacob", weight:120 },
-      { id: uuid(), name:"WDH", weight:hitch }
+  
+if(!Array.isArray(s.trip.truckLoads) || s.trip.truckLoads.length===0){
+  s.trip.truckLoads = [
+      { id: uuid(), name:"Driver", weight:180 },
+      { id: uuid(), name:"Passenger", weight:150 },
+      { id: uuid(), name:"Passenger", weight:120 }
     ];
-  }
+}
 
   if(!Array.isArray(s.trip.trailerLoads) || s.trip.trailerLoads.length===0){
     const cargo = Number.isFinite(+s.trip.trailerCargo) ? +s.trip.trailerCargo : 0;
