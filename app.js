@@ -17,9 +17,9 @@ function defaultState(){
     settings:{warnPct:90},
     trucks:[{id:truckId,name:"2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",gvwr:7350,gcwr:17000,payload:1391,maxTow:9650,maxTongue:1160,curb:0,rearGawr:4150,frontGawr:3900,receiverRating:0,hitchRating:0,ballRating:0,tireRating:0}],
     trailers,
-    trip:{truckId, trailerId:trailers[0].id, presetId:"winter_boondock",
-      truckLoads:[{id:uuid(),name:"Gino",weight:180},{id:uuid(),name:"Cristina",weight:150},{id:uuid(),name:"Jacob",weight:120},{id:uuid(),name:"WDH",weight:90}],trailerGear:1200,waterLb:166.8,propaneLb:60,battLb:120,
-      twMode:"range",twFixedPct:12.5,twLowPct:13.0,twHighPct:15.5
+    trip:{truckId, trailerId:trailers[0].id,
+      truckLoads:[{id:uuid(),name:"Gino",weight:180},{id:uuid(),name:"Cristina",weight:150},{id:uuid(),name:"Jacob",weight:120},{id:uuid(),name:"WDH",weight:90}],
+      twFixedPct:12.5
     }
   };
 }
@@ -55,6 +55,24 @@ function clearTripDirty(){
   const note = $("pendingNote");
   if(note) note.classList.add("hidden");
 }
+
+function markTruckDirty(){
+  const note = $("truckPendingNote");
+  if(note) note.classList.remove("hidden");
+}
+function clearTruckDirty(){
+  const note = $("truckPendingNote");
+  if(note) note.classList.add("hidden");
+}
+function markTrailerDirty(){
+  const note = $("trailerPendingNote");
+  if(note) note.classList.remove("hidden");
+}
+function clearTrailerDirty(){
+  const note = $("trailerPendingNote");
+  if(note) note.classList.add("hidden");
+}
+
 function activateTab(tabId){
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active", b.dataset.tab===tabId));
   document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active", p.id===tabId));
@@ -71,14 +89,8 @@ function hydrate(s){
   if(!s.trip.truckId||!s.trucks.find(t=>t.id===s.trip.truckId)) s.trip.truckId=s.trucks[0].id;
   if(!s.trip.trailerId||!s.trailers.find(t=>t.id===s.trip.trailerId)) s.trip.trailerId=s.trailers[0].id;
 
-  // Back-compat: migrate older schemas to truckLoads (then drop passengers)
   if(Array.isArray(s.trip.passengers) && s.trip.passengers.length){
-    if(!Array.isArray(s.trip.truckLoads))     s.trip.truckLoads = [
-      { id: uuid(), name:"Gino", weight:180 },
-      { id: uuid(), name:"Cristina", weight:150 },
-      { id: uuid(), name:"Jacob", weight:120 },
-      { id: uuid(), name:"WDH", weight:hitch }
-    ];
+    if(!Array.isArray(s.trip.truckLoads)) s.trip.truckLoads = [];
     s.trip.passengers.forEach(p=>{
       let nm = p.name || "Passenger";
       if(nm==="Driver") nm="Gino";
@@ -86,20 +98,18 @@ function hydrate(s){
         s.trip.truckLoads.push({ id: uuid(), name: nm, weight: Number.isFinite(+p.weight) ? +p.weight : 0 });
       }
     });
-    // drop passengers after merge
     delete s.trip.passengers;
   }
   if(!Array.isArray(s.trip.truckLoads) || s.trip.truckLoads.length===0){
-    const cargo = Number.isFinite(+s.trip.truckCargo) ? +s.trip.truckCargo : 0;
     const hitch = Number.isFinite(+s.trip.hitchHardware) ? +s.trip.hitchHardware : 0;
     s.trip.truckLoads = [
       { id: uuid(), name:"Gino", weight:180 },
       { id: uuid(), name:"Cristina", weight:150 },
       { id: uuid(), name:"Jacob", weight:120 },
-      { id: uuid(), name:"WDH", weight:hitch },    ];
+      { id: uuid(), name:"WDH", weight:hitch }
+    ];
   }
 
-  // Back-compat: migrate trailer inputs to trailerLoads
   if(!Array.isArray(s.trip.trailerLoads) || s.trip.trailerLoads.length===0){
     const cargo = Number.isFinite(+s.trip.trailerCargo) ? +s.trip.trailerCargo : 0;
     const waterGal = Number.isFinite(+s.trip.freshWater) ? +s.trip.freshWater : 0;
@@ -114,6 +124,15 @@ function hydrate(s){
     ];
   }
 
+  if(!Number.isFinite(+s.trip.twFixedPct) || +s.trip.twFixedPct<=0){
+    if(Number.isFinite(+s.trip.twHighPct) && +s.trip.twHighPct>0) s.trip.twFixedPct = +s.trip.twHighPct;
+    else if(Number.isFinite(+s.trip.twLowPct) && +s.trip.twLowPct>0) s.trip.twFixedPct = +s.trip.twLowPct;
+    else s.trip.twFixedPct = d.trip.twFixedPct;
+  }
+  delete s.trip.twMode;
+  delete s.trip.twLowPct;
+  delete s.trip.twHighPct;
+  delete s.trip.presetId;
   return s;
 }
 function loadState(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw) return defaultState();return hydrate(JSON.parse(raw));}catch{return defaultState();}}
@@ -129,10 +148,10 @@ function calc(){
   const loadedTrailer = (+tr.dry||0) + trailerLoadTotalLbs;
   const dryRatio=((+tr.dryTongue||0)>0 && (+tr.dry||0)>0)?((+tr.dryTongue||0)/(+tr.dry||1)):0.12;
 
-  let tongueLow=0,tongueHigh=0,tongueLabel="";
-  if(trip.twMode==="autoDry"){ trip.twMode="fixed"; trip.twFixedPct = (dryRatio*100); }
-  else if(trip.twMode==="fixed"){const pct=(+trip.twFixedPct||12.5)/100;const tw=pct*loadedTrailer;tongueLow=tw;tongueHigh=tw;tongueLabel="Fixed %";}
-  else {const low=(+trip.twLowPct||12)/100, high=(+trip.twHighPct||15)/100;tongueLow=low*loadedTrailer;tongueHigh=high*loadedTrailer;tongueLabel="Range %";}
+  const pct=(+trip.twFixedPct||12.5)/100;
+  const tongueLow=pct*loadedTrailer;
+  const tongueHigh=tongueLow;
+  const tongueLabel="Loaded %";
 
   const truckLoads = Array.isArray(trip.truckLoads)? trip.truckLoads : [];
   const truckLoadTotal = sum(truckLoads.map(x=>+x.weight||0));
@@ -191,7 +210,7 @@ function renderLists(){
   state.trucks.forEach(t=>{
     const div=document.createElement("div");
     div.className="item"+(t.id===selectedTruckId?" active":"");
-    div.innerHTML=`<div><div class="name">${escapeHtml(t.name||"Unnamed truck")}</div><div class="meta">Payload ${fmtLb(t.payload||0)} • Tow ${fmtLb(t.maxTow||0)}</div></div><div class="badge">${fmtLb(t.gvwr||0)} GVWR</div>`;
+    div.innerHTML=`<div><div class="name">${escapeHtml(t.name||"Unnamed truck")}</div><div class="meta">Payload ${fmtLb(t.payload||0)} • Tow ${fmtLb(t.maxTow||0)} • GVWR ${fmtLb(t.gvwr||0)}</div></div>`;
     div.onclick=()=>{selectedTruckId=t.id; renderLists(); renderTruckForm(); syncTripSelectors(); saveState();};
     list.appendChild(div);
   });
@@ -200,13 +219,12 @@ function renderLists(){
   state.trailers.forEach(tr=>{
     const div=document.createElement("div");
     div.className="item"+(tr.id===selectedTrailerId?" active":"");
-    div.innerHTML=`<div><div class="name">${escapeHtml(tr.name||"Unnamed trailer")}</div><div class="meta">Dry ${fmtLb(tr.dry||0)} • GVWR ${fmtLb(tr.gvwr||0)} • Dry tongue ${fmtLb(tr.dryTongue||0)} lb</div></div>`;
+    div.innerHTML=`<div><div class="name">${escapeHtml(tr.name||"Unnamed trailer")}</div><div class="meta">Dry ${fmtLb(tr.dry||0)} • GVWR ${fmtLb(tr.gvwr||0)} • Dry tongue ${Math.round(tr.dryTongue||0).toLocaleString()} lb</div></div>`;
     div.onclick=()=>{selectedTrailerId=tr.id; renderLists(); renderTrailerForm(); updateTrailerComputed(); syncTripSelectors(); saveState();};
     listT.appendChild(div);
   });
-  setEmptyState($('truckList'), 'No trucks yet. Click “New truck” to add one.');
-  setEmptyState($('trailerList'), 'No trailers yet. Click “New trailer” to add one.');
-
+  setEmptyState($("truckList"), 'No trucks yet. Click “New truck” to add one.');
+  setEmptyState($("trailerList"), 'No trailers yet. Click “New trailer” to add one.');
 }
 
 function renderTruckForm(){
@@ -242,7 +260,7 @@ function bindTruckForm(){
     $(id).addEventListener("input", ()=>{
       const t=state.trucks.find(x=>x.id===selectedTruckId); if(!t) return;
       t[key]=coerce($(id).value);
-      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed();
+      saveState(); syncTripSelectors(); markTruckDirty();
     });
   });
 }
@@ -282,7 +300,7 @@ function bindTrailerForm(){
     $(id).addEventListener("input", ()=>{
       const tr=state.trailers.find(x=>x.id===selectedTrailerId); if(!tr) return;
       tr[key]=coerce($(id).value);
-      saveState(); syncTripSelectors(); renderResults(); updateTrailerComputed();
+      saveState(); syncTripSelectors(); updateTrailerComputed(); markTrailerDirty();
     });
   });
 }
@@ -295,13 +313,6 @@ function syncTripSelectors(){
   if(!state.trailers.find(t=>t.id===state.trip.trailerId)) state.trip.trailerId=state.trailers[0].id;
   selTruck.value=state.trip.truckId; selTrailer.value=state.trip.trailerId;
 }
-
-function showTongueBoxes(){
-  const mode=$("twMode").value;
-  $("twFixed").classList.toggle("hidden", mode!=="fixed");
-  $("twRange").classList.toggle("hidden", mode!=="range");
-}
-
 
 
 function renderTruckLoads(){
@@ -374,11 +385,7 @@ function renderTrailerLoads(){
 }
 
 function renderTrip(){
-  $("twMode").value=state.trip.twMode;
   $("twFixedPct").value=state.trip.twFixedPct;
-  $("twLowPct").value=state.trip.twLowPct;
-  $("twHighPct").value=state.trip.twHighPct;
-  showTongueBoxes();
   renderTruckLoads();
   renderTrailerLoads();
 }
@@ -405,10 +412,7 @@ function bindTrip(){
     };
   }
 
-  $("twMode").addEventListener("change",e=>{state.trip.twMode=e.target.value; showTongueBoxes(); saveState(); markTripDirty();});
   $("twFixedPct").addEventListener("input",e=>{state.trip.twFixedPct=num(e.target.value); saveState(); markTripDirty();});
-  $("twLowPct").addEventListener("input",e=>{state.trip.twLowPct=num(e.target.value); saveState(); markTripDirty();});
-  $("twHighPct").addEventListener("input",e=>{state.trip.twHighPct=num(e.target.value); saveState(); markTripDirty();});
 }
 
 function bindSettings(){
@@ -465,7 +469,7 @@ const cards=[
     const used = r.payloadUsedHigh;
     const rem = limit - used;
     return {title:"Payload",
-      value:(rem<0)?`${fmtLb(Math.abs(rem))} over limit`:(r.trip.twMode==="range")?`${fmtLb(rem)} remaining (high)`:`${fmtLb(rem)} remaining`,
+      value:(rem<0)?`${fmtLb(Math.abs(rem))} over limit`:`${fmtLb(rem)} remaining`,
       sub:`${fmtLb(used)} used of ${fmtLb(limit)}`,
       ok: rem>=0,
       util: (limit>0)? (used/limit) : 0
@@ -477,8 +481,8 @@ const cards=[
     const used = r.tongueHigh;
     const util = (limit>0)? (used/limit) : 0;
     return {title:"Tongue weight",
-      value:(r.trip.twMode==="range")?`${fmtLb(r.tongueLow)} – ${fmtLb(r.tongueHigh)}`:`${fmtLb(r.tongueHigh)}`,
-      sub:`${fmtLb(r.tongueHigh)} vs ${fmtLb(limit)} max (WDH) • ${r.tongueLabel}`,
+      value:`${fmtLb(r.tongueHigh)}`,
+      sub:`${fmtLb(r.tongueHigh)} used of ${fmtLb(limit)} max (WDH)`,
       ok: used<=limit || limit===0 ? r.tongueOk : (used<=limit),
       util
     };
@@ -544,9 +548,7 @@ const wrap=$("resultsSummary"); wrap.innerHTML="";
     wrap.appendChild(div);
   });
 
-  const tonguePctLow=r.loadedTrailer>0?(r.tongueLow/r.loadedTrailer)*100:0;
-  const tonguePctHigh=r.loadedTrailer>0?(r.tongueHigh/r.loadedTrailer)*100:0;
-  
+    
 $("resultsDetails").innerHTML=`
   <div class="card"><div class="label muted small">Selected</div><div><b>${escapeHtml(r.truck.name||"Truck")}</b> towing <b>${escapeHtml(r.tr.name||"Trailer")}</b></div></div>
   <div class="card"><div class="label muted small">Load breakdown</div>
@@ -573,8 +575,8 @@ if((+r.truck.ballRating||0)>0 && r.tongueHigh>(+r.truck.ballRating||0)) w.push({
   if(!r.trailerGvwrOk) w.push({level:"bad",title:"Over trailer GVWR",msg:`Trailer weight ${fmtLb(r.loadedTrailer)} exceeds trailer GVWR ${fmtLb(r.tr.gvwr||0)}.`});
   else if(r.utilization.trailerGvwr>=warnPct) w.push({level:"warn",title:"Trailer GVWR near limit",msg:`Trailer weight is ${(r.utilization.trailerGvwr*100).toFixed(1)}% of GVWR.`});
 
-  if(!r.gvwrOk) w.push({level:"bad",title:"Over truck weight",msg:`Truck est ${fmtLb(r.estTruckWeightHigh)} exceeds GVWR ${fmtLb(r.truck.gvwr||0)}.`});
-  else if(r.utilization.gvwr>=warnPct) w.push({level:"warn",title:"Truck GVWR near limit",msg:`Truck is ${(r.utilization.gvwr*100).toFixed(1)}% of GVWR.`});
+  if(!r.gvwrOk) w.push({level:"bad",title:"Over truck weight",msg:`Estimated truck weight ${fmtLb(r.estTruckWeightHigh)} exceeds GVWR ${fmtLb(r.truck.gvwr||0)}.`});
+  else if(r.utilization.gvwr>=warnPct) w.push({level:"warn",title:"Truck weight near limit",msg:`Truck is ${(r.utilization.gvwr*100).toFixed(1)}% of GVWR.`});
 
   if(!r.gcwrOk) w.push({level:"bad",title:"Over GCWR (estimated)",msg:`Combined est ${fmtLb(r.gcwrHigh)} exceeds GCWR ${fmtLb(r.truck.gcwr||0)}.`});
   else if(r.utilization.gcwr>=warnPct) w.push({level:"warn",title:"GCWR near limit",msg:`Combined is ${(r.utilization.gcwr*100).toFixed(1)}% of GCWR.`});
@@ -594,22 +596,42 @@ if((+r.truck.ballRating||0)>0 && r.tongueHigh>(+r.truck.ballRating||0)) w.push({
 }
 
 function bindCrud(){
-  $("btnNewTruck").onclick=()=>{const t={id:uuid(),name:"New truck",gvwr:0,gcwr:0,payload:0,maxTow:0,maxTongue:0,curb:0,rearGawr:0,frontGawr:0}; state.trucks.unshift(t); selectedTruckId=t.id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();};
-    $("btnDelTruck").onclick=()=>{
-  const t=state.trucks.find(x=>x.id===state.ui.editTruckId);
-  if(!confirm(`Delete truck "${(t&&t.name)||"Truck"}"?`)) return;if(state.trucks.length<=1) return alert("Keep at least one truck."); state.trucks=state.trucks.filter(x=>x.id!==selectedTruckId); if(!state.trucks.find(x=>x.id===state.trip.truckId)) state.trip.truckId=state.trucks[0].id; selectedTruckId=state.trucks[0].id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults();};
+  $("btnNewTruck").onclick=()=>{
+    const t={id:uuid(),name:"New truck",gvwr:0,gcwr:0,payload:0,maxTow:0,maxTongue:0,curb:0,rearGawr:0,frontGawr:0,receiverRating:0,hitchRating:0,ballRating:0,tireRating:0};
+    state.trucks.unshift(t); selectedTruckId=t.id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); markTruckDirty();
+  };
+  $("btnDelTruck").onclick=()=>{
+    const t=state.trucks.find(x=>x.id===selectedTruckId);
+    if(!t) return;
+    if(!confirm(`Delete truck "${(t.name)||"Truck"}"?`)) return;
+    if(state.trucks.length<=1) return alert("Keep at least one truck.");
+    state.trucks=state.trucks.filter(x=>x.id!==selectedTruckId);
+    selectedTruckId=state.trucks[0].id;
+    if(!state.trucks.find(x=>x.id===state.trip.truckId)) state.trip.truckId=state.trucks[0].id;
+    saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); renderResults(); clearTruckDirty();
+  };
 
-  $("btnNewTrailer").onclick=()=>{const tr={id:uuid(),name:"New trailer",dry:0,dryTongue:0,gvwr:0,freshCap:0}; state.trailers.unshift(tr); selectedTrailerId=tr.id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};
-    $("btnDelTrailer").onclick=()=>{
-  const t=state.trailers.find(x=>x.id===state.ui.editTrailerId);
-  if(!confirm(`Delete trailer "${(t&&t.name)||"Trailer"}"?`)) return;if(state.trailers.length<=1) return alert("Keep at least one trailer."); state.trailers=state.trailers.filter(x=>x.id!==selectedTrailerId); if(!state.trailers.find(x=>x.id===state.trip.trailerId)) state.trip.trailerId=state.trailers[0].id; selectedTrailerId=state.trailers[0].id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); renderResults();};
+  $("btnNewTrailer").onclick=()=>{
+    const tr={id:uuid(),name:"New trailer",dry:0,dryTongue:0,gvwr:0,freshCap:0};
+    state.trailers.unshift(tr); selectedTrailerId=tr.id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); updateTrailerComputed(); markTrailerDirty();
+  };
+  $("btnDelTrailer").onclick=()=>{
+    const t=state.trailers.find(x=>x.id===selectedTrailerId);
+    if(!t) return;
+    if(!confirm(`Delete trailer "${(t.name)||"Trailer"}"?`)) return;
+    if(state.trailers.length<=1) return alert("Keep at least one trailer.");
+    state.trailers=state.trailers.filter(x=>x.id!==selectedTrailerId);
+    selectedTrailerId=state.trailers[0].id;
+    if(!state.trailers.find(x=>x.id===state.trip.trailerId)) state.trip.trailerId=state.trailers[0].id;
+    saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); updateTrailerComputed(); renderResults(); clearTrailerDirty();
+  };
 }
 
 function bindBackup(){
   $("btnImport").onclick=()=>{ $("fileImport").click(); };
   $("btnExport").onclick=()=>{
     const s = JSON.parse(JSON.stringify(state));
-    if(s.trip) delete s.trip.passengers;
+    if(s.trip){ delete s.trip.passengers; delete s.trip.twMode; delete s.trip.twLowPct; delete s.trip.twHighPct; delete s.trip.presetId; }
     const blob=new Blob([JSON.stringify(s,null,2)],{type:"application/json"});
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a"); a.href=url; a.download="towcalc-backup.json"; a.click();
@@ -639,6 +661,14 @@ function bindBackup(){
 
 
 
+
+function bindSaveButtons(){
+  const btnTruck=$("btnSaveTruck");
+  if(btnTruck) btnTruck.onclick=()=>{ clearTruckDirty(); renderResults(); activateTab("tab-results"); };
+  const btnTrailer=$("btnSaveTrailer");
+  if(btnTrailer) btnTrailer.onclick=()=>{ clearTrailerDirty(); renderResults(); activateTab("tab-results"); };
+}
+
 function bindCalculate(){
   const btn = $("btnCalculate");
   if(!btn) return;
@@ -661,6 +691,9 @@ function boot(rerender=false){
   renderTrip();
   bindSettings();
   renderResults();
+  clearTruckDirty();
+  clearTrailerDirty();
+  clearTripDirty();
 
   if(rerender) return;
 
@@ -669,6 +702,7 @@ function boot(rerender=false){
   bindTrailerForm();
   bindTrip();
   bindCalculate();
+  bindSaveButtons();
   bindCrud();
   bindBackup();
 

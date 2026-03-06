@@ -33,7 +33,7 @@
     <section id="tab-results" class="panel active">
       <div class="panel-head">
         <h2>Results</h2>
-        <div class="muted">Pick a Truck + Trailer in <b>Trip</b>. Warnings are based on the “high” tongue estimate when a range is used.</div>
+        <div class="muted">Pick a Truck + Trailer in <b>Trip</b>.</div>
       </div>
 
       <div class="card">
@@ -44,7 +44,7 @@
       <div class="card">
         <h3>Utilization</h3>
         <div id="utilChart"></div>
-        <div class="muted small">Bars show percent of limit used. Consider aiming for sustained use under ~90% where practical.</div>
+        <div class="muted small">Bars show percent of limit used. Target sustained use under ~90% where practical.</div>
       </div>
 
       <div id="resultsSummary" class="cards"></div>
@@ -56,296 +56,249 @@
     </section>
 
     <section id="tab-trip" class="panel">
-      <div class="panel-head">
-        <h2>Trip setup</h2>
-        <div class="muted">Choose a truck and trailer, then edit truck and trailer loads. Press Calculate to update results.</div>
-      </div>
+  <div class="panel-head">
+    <h2>Trip setup</h2>
+    <div class="muted">Choose a truck and trailer, then edit loads. Press Calculate to update results.</div>
+  </div>
 
-      <div class="grid2">
-</div>
+  <div class="card">
+    <h3>Selections</h3>
+    <div class="form">
+      <label>Truck
+        <select id="tripTruck"></select>
+      </label>
+      <label>Trailer
+        <select id="tripTrailer"></select>
+      </label>
+      <label>Loaded tongue %
+        <input id="twFixedPct" type="number" step="0.1" min="5" max="25" inputmode="decimal" class="num leftnum"/>
+      </label>
+      <div id="dryRatioHint" class="muted small"></div>
+      <div class="muted small">Typical travel trailers often land around 12–15% when loaded.</div>
+    </div>
+  </div>
 
-        <div class="card">
-          <h3>Selections</h3>
-          <div class="form">
-            <label>Truck
-              <select id="tripTruck"></select>
-            </label>
-            <label>Trailer
-              <select id="tripTrailer"></select>
-            </label>
-<div class="muted small">Tip: Use <b>Range %</b> tongue mode for realistic planning (e.g., 12–15%).
-            <hr/>
-            <h4>Tongue weight model</h4>
+  <div class="card" style="grid-column:1/-1">
+    <h3>Truck load</h3>
+    <div class="form">
+      <div class="muted small">Everything that counts against payload (people + gear + accessories + hitch hardware). Add/remove items as needed.</div>
+      <div id="truckLoads" class="listbox"></div>
+      <button id="btnAddLoad" class="btn btn-secondary">Add load</button>
+    </div>
+  </div>
 
-            <label>Mode
-              <select id="twMode">
-                <option value="fixed">Fixed % of loaded weight</option>
-                <option value="range">Range % of loaded weight</option>
-              </select>
-            </label>
+  <div class="card">
+    <h3>Trailer load</h3>
+    <div class="form">
+      <div class="muted small">Add items that count toward trailer loaded weight. All values are in pounds. (If you add water, propane, etc., enter their estimated weight in pounds.)</div>
+      <div id="trailerLoads" class="listbox"></div>
+      <button id="btnAddTrailerLoad" class="btn btn-secondary">Add load</button>
+    </div>
+  </div>
 
-            <div id="twFixed" class="twbox hidden">
-              <label>Loaded tongue %
-                <input id="twFixedPct" type="number" step="0.1" min="5" max="25"/ inputmode="numeric" class="num">
-              </label>
-              <div id="dryRatioHint" class="muted small"></div>
-              <div class="muted small">Typical travel trailers often land around 12–15% when loaded.</div>
-            </div>
-
-            <div id="twRange" class="twbox hidden">
-              <div class="row">
-                <label>Low %
-                  <input id="twLowPct" type="number" step="0.1" min="5" max="25"/ inputmode="numeric" class="num">
-                </label>
-                <label>High %
-                  <input id="twHighPct" type="number" step="0.1" min="5" max="25"/ inputmode="numeric" class="num">
-                </label>
-              </div>
-              <div class="muted small">Warnings are based on the high end of the range.</div>
-          </div>
-        </div>
-
-        </div>
-        </div>
-      </div>
-
-      <div class="grid2">
-        <div class="card" style="grid-column:1/-1">
-          <h3>Truck load</h3>
-          <div class="form">
-            <div class="muted small">Everything that counts against payload (people + gear + accessories + hitch hardware). Add/remove items as needed.</div>
-            <div id="truckLoads" class="listbox"></div>
-            <button id="btnAddLoad" class="btn btn-secondary">Add load</button>
-          </div>
-        </div>
-        </div>
-
-        <div class="card">
-          <h3>Trailer load</h3>
-          <div class="form">
-            <div class="muted small">Add items that count toward trailer loaded weight. All values are in pounds. (If you add water, propane, etc., enter their estimated weight in pounds.)</div>
-            <div id="trailerLoads" class="listbox"></div>
-            <button id="btnAddTrailerLoad" class="btn btn-secondary">Add load</button>
-</div>
-          </div>
-
-<div class="row" style="margin-top:12px">
-  <button id="btnCalculate" class="btn btn-primary">Calculate</button>
-  <div id="pendingNote" class="muted small hidden" style="align-self:center">Edits pending — press Calculate to update results.</div>
-</div>
-
-        </div>
-      </div>
-
+  <div class="row" style="margin-top:12px">
+    <button id="btnCalculate" class="btn btn-primary">Calculate</button>
+    <div id="pendingNote" class="muted small hidden" style="align-self:center">Edits pending — press Calculate to update results.</div>
+  </div>
 </section>
 
     <section id="tab-trucks" class="panel">
-      <div class="panel-head">
-        <h2>Trucks</h2>
-        <div class="muted">Manage multiple tow-vehicle profiles.</div>
+  <div class="panel-head">
+    <h2>Trucks</h2>
+    <div class="muted">Manage multiple tow-vehicle profiles.</div>
+  </div>
+
+  <div class="card">
+    <h3>Truck list</h3>
+    <div id="truckList" class="list"></div>
+    <div class="row actionsRow">
+      <button id="btnNewTruck" class="btn btn-primary">New truck</button>
+      <button id="btnDelTruck" class="btn btn-danger">Delete truck</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Truck details</h3>
+    <div class="form">
+      <label>Name
+        <input id="truckName" type="text" placeholder="e.g., 2021 F-150 PowerBoost"/>
+      </label>
+      <div class="row">
+        <label>GVWR (lbs)
+          <input id="truckGVWR" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+        <label>GCWR (lbs)
+          <input id="truckGCWR" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
       </div>
-
-      <div class="grid2">
-        <div class="card">
-          <h3>Truck list</h3>
-          <div id="truckList" class="list"></div>
-          <div class="row">
-            <button id="btnNewTruck" class="btn btn-primary">New truck</button>
-<button id="btnDelTruck" class="btn btn-danger">Delete truck</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Truck details</h3>
-          <div class="form">
-            <label>Name
-              <input id="truckName" type="text" placeholder="e.g., 2021 F-150 PowerBoost"/>
-            </label>
-
-            <div class="row">
-              <label>GVWR (lbs)
-                <input id="truckGVWR" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-              </label>
-              <label>GCWR (lbs)
-                <input id="truckGCWR" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-              </label>
-            </div>
-
-            <div class="row">
-              <label>Payload (lbs)
-                <input id="truckPayload" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-              </label>
-              <label>Towing capacity (lbs)
-                <input id="truckTow" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-              </label>
-            </div>
-
-            <div class="row">
-              <label><b>Max tongue weight (lbs)</b> <span class="muted">w/weight distributing hitch</span><input id="truckTongue" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-              </label>
-              <label>Curb weight (optional) (lbs)
-                <input id="truckCurb" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-              </label>
-            </div>
-
-            <div class="row">
-              <label>Rear GAWR (lbs)
-                <input id="truckRearGawr" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-              </label>
-              <label>Front GAWR (lbs)
-                <input id="truckFrontGawr" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-              </label>
-            </div><div class="row">
-  <label>Hitch receiver rating (lbs)
-    <input id="truckReceiverRating" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-  </label>
-  <label>Hitch rating (lbs)
-    <input id="truckHitchRating" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-  </label>
-</div>
-
-<div class="row">
-  <label>Hitch ball rating (lbs)
-    <input id="truckBallRating" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-  </label>
-  <label>Tire weight rating (lbs)
-    <input id="truckTireRating" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-  </label>
-</div>
-
-
-
-            <div class="muted small">If curb weight is blank, TowCalc estimates it as <b>GVWR − Payload</b> (approximate).</div>
-          </div>
-        </div>
+      <div class="row">
+        <label>Payload (lbs)
+          <input id="truckPayload" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+        <label>Towing capacity (lbs)
+          <input id="truckTow" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
       </div>
-    </section>
+      <div class="row">
+        <label><b>Max tongue weight (lbs)</b> <span class="muted">w/weight distributing hitch</span>
+          <input id="truckTongue" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+        <label>Curb weight (optional) (lbs)
+          <input id="truckCurb" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+      </div>
+      <div class="row">
+        <label>Rear GAWR (lbs)
+          <input id="truckRearGawr" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+        <label>Front GAWR (lbs)
+          <input id="truckFrontGawr" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+      </div>
+      <div class="row">
+        <label>Hitch receiver rating (lbs)
+          <input id="truckReceiverRating" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+        <label>Hitch rating (lbs)
+          <input id="truckHitchRating" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+      </div>
+      <div class="row">
+        <label>Hitch ball rating (lbs)
+          <input id="truckBallRating" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+        <label>Tire weight rating (lbs)
+          <input id="truckTireRating" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+      </div>
+      <div class="muted small">If curb weight is blank, TowCalc estimates it as <b>GVWR − Payload</b>.</div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:12px">
+    <button id="btnSaveTruck" class="btn btn-primary">Save truck</button>
+    <div id="truckPendingNote" class="muted small hidden" style="align-self:center">Edits pending — press Save truck to update results.</div>
+  </div>
+</section>
 
     <section id="tab-trailers" class="panel">
-      <div class="panel-head">
-        <h2>Trailers</h2>
-        <div class="muted">Manage multiple trailer profiles.</div>
-      </div>
-
-      <div class="grid2">
-        <div class="card">
-          <h3>Trailer list</h3>
-          <div id="trailerList" class="list"></div>
-          <div class="row">
-            <button id="btnNewTrailer" class="btn btn-primary">New trailer</button>
-<button id="btnDelTrailer" class="btn btn-danger">Delete trailer</button>
-          </div>
-        </div>
-
-        <div class="card">
-  <h3>Trailer details</h3>
-  <div class="form" id="trailerDetails">
-    <label>Name
-      <input id="trailerName" type="text" placeholder="e.g., Lance 1995"/>
-    </label>
-
-    <div class="row">
-      <label>Dry weight (lbs)
-        <input id="trailerDry" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-      </label>
-      <label>Dry tongue (lbs)
-        <input id="trailerDryTongue" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-      </label>
-    </div>
-
-    <div class="row">
-      <label>GVWR (lbs)
-        <input id="trailerGVWR" type="number" step="1" min="0"/ inputmode="numeric" class="num">
-      </label>
-      <label><span style="font-weight:700">Fresh water capacity (gal)</span> <span class="muted fw-normal">8.34 lbs/gal</span>
-        <input id="trailerFreshCap" type="number" step="0.5" min="0"/ inputmode="numeric" class="num">
-      </label>
-    </div>
-
-    <hr/>
-
-    <label><span style="font-weight:700">Payload capacity</span> <span class="muted fw-normal">GVWR minus dry weight</span>
-      <div id="trCalcPayload" class="readonly">—</div>
-    </label>
-
-    <label><span style="font-weight:700">Dry tongue weight %</span> <span class="muted fw-normal">dry hitch weight / dry weight</span>
-      <div id="trCalcDryTonguePct" class="readonly">—</div>
-    </label>
-
-    <label><span style="font-weight:700">Gross hitch weight</span> <span class="muted fw-normal">GVWR * dry tongue weight %</span>
-      <div id="trCalcGrossHitch" class="readonly">—</div>
-    </label>
+  <div class="panel-head">
+    <h2>Trailers</h2>
+    <div class="muted">Manage multiple trailer profiles.</div>
   </div>
-</div>
+
+  <div class="card">
+    <h3>Trailer list</h3>
+    <div id="trailerList" class="list"></div>
+    <div class="row actionsRow">
+      <button id="btnNewTrailer" class="btn btn-primary">New trailer</button>
+      <button id="btnDelTrailer" class="btn btn-danger">Delete trailer</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Trailer details</h3>
+    <div class="form" id="trailerDetails">
+      <label>Name
+        <input id="trailerName" type="text" placeholder="e.g., Lance 1995"/>
+      </label>
+      <div class="row">
+        <label>Dry weight (lbs)
+          <input id="trailerDry" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+        <label>Dry tongue (lbs)
+          <input id="trailerDryTongue" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
       </div>
-    </section>
+      <div class="row">
+        <label>GVWR (lbs)
+          <input id="trailerGVWR" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
+        </label>
+        <label><span class="mainlabel">Fresh water capacity (gal)</span> <span class="muted helpertext">8.34 lbs/gal</span>
+          <input id="trailerFreshCap" type="number" step="0.5" min="0" inputmode="decimal" class="num leftnum"/>
+        </label>
+      </div>
+      <hr/>
+      <label><span class="mainlabel">Payload capacity</span> <span class="muted helpertext">GVWR minus dry weight</span>
+        <div id="trCalcPayload" class="readonly">—</div>
+      </label>
+      <label><span class="mainlabel">Dry tongue weight %</span> <span class="muted helpertext">dry hitch weight / dry weight</span>
+        <div id="trCalcDryTonguePct" class="readonly">—</div>
+      </label>
+      <label><span class="mainlabel">Gross hitch weight</span> <span class="muted helpertext">GVWR * dry tongue weight %</span>
+        <div id="trCalcGrossHitch" class="readonly">—</div>
+      </label>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:12px">
+    <button id="btnSaveTrailer" class="btn btn-primary">Save trailer</button>
+    <div id="trailerPendingNote" class="muted small hidden" style="align-self:center">Edits pending — press Save trailer to update results.</div>
+  </div>
+</section>
 
     <section id="tab-settings" class="panel">
-      <div class="panel-head">
-        <h2>Settings</h2>
-        <div class="muted">Defaults and assumptions.</div>
-      </div>
+  <div class="panel-head">
+    <h2>Settings</h2>
+    <div class="muted">Defaults and assumptions.</div>
+  </div>
 
-      <div class="grid2">
-        <div class="card">
-          <h3>General</h3>
-          <div class="form">
-<label>Warn at utilization (%)
-              <input id="warnPct" type="number" step="1" min="50" max="100"/ inputmode="numeric" class="num">
-            </label>
-            <div class="muted small">Warnings fire when a limit exceeds this percent.</div>
-          </div>
-        </div>
-
-        
-        </div>
-      </div>
-    
-    <div class="card">
-      <h3>Data</h3>
-      <div class="btnRow">
-        <button id="btnExport" class="btn btn-secondary">Export</button>
-        <button id="btnImport" class="btn">Import</button>
-      
-        <button id="btnReset" class="btn btn-danger">Reset</button></div>
-        <input id="fileImport" type="file" accept="application/json" style="display:none"/>
+  <div class="card" style="grid-column:1/-1">
+    <h3>General</h3>
+    <div class="form">
+      <label>Warn at utilization (%)
+        <input id="warnPct" type="number" step="1" min="50" max="100" inputmode="numeric" class="num leftnum"/>
+      </label>
+      <div class="muted small">Warnings fire when a limit exceeds this percent.</div>
     </div>
+  </div>
 
-    <div class="card">
-      <h3>Towing checklist</h3>
-      <div class="muted small" style="margin-bottom:10px">Use this checklist before towing to confirm your loaded setup is within all relevant limits.</div>
-      <div class="small">
-        <div style="font-weight:700;margin-top:6px">On Results page:</div>
-        <ol style="margin:6px 0 10px 18px">
-          <li>Payload within limits?</li>
-          <li>Tongue weight within limits?</li>
-          <li>Trailer weight (GVWR) within limits?</li>
-          <li>Truck weight (GVWR) within limits?</li>
-          <li>Truck &amp; trailer combined weight (GCWR) within limits?</li>
-        </ol>
-        <div style="font-weight:700;margin-top:6px">Other:</div>
-        <ol start="6" style="margin:6px 0 0 18px">
-          <li>Hitch Receiver within limits? Check hitch class rating.</li>
-          <li>Hitch within limits? Check rating on hitch.</li>
-          <li>Hitch ball within limits? Check rating on ball.</li>
-          <li>Truck GAWR's within limits? Check axle loads on truck scale.</li>
-          <li>Trailer GAWR within limits? Check axle loads on truck scale.</li>
-          <li>Truck tires within load limit? Check tire weight rating.</li>
-        </ol>
-      </div>
+  <div class="card">
+    <h3>Data</h3>
+    <div class="btnRow">
+      <button id="btnExport" class="btn btn-secondary">Export</button>
+      <button id="btnImport" class="btn">Import</button>
+      <button id="btnReset" class="btn btn-danger">Reset</button>
     </div>
-<div class="card">
-          <h3>About</h3>
-          <div class="muted">
-            <p><b>TowCalc</b> is an offline-first towing calculator you can install on Android (PWA).</p>
-            <ul class="muted">
-              <li>No account, no ads.</li>
-              <li>All data stored locally on your device.</li>
-              <li>Export/Import JSON for backups.</li>
-            </ul>
-            <div class="muted small">Disclaimer: For planning/education. Verify with door sticker, manuals, and scale weights.</div>
-          </div>
+    <input id="fileImport" type="file" accept="application/json" style="display:none"/>
+  </div>
 
+  <div class="card settings-copy">
+    <h3>Towing checklist</h3>
+    <div class="muted small" style="margin-bottom:10px">Use this checklist before towing to confirm your loaded setup is within all relevant limits.</div>
+    <div class="small">
+      <div style="font-weight:700;margin-top:6px">On Results page:</div>
+      <ol style="margin:6px 0 10px 18px">
+        <li>Payload within limits?</li>
+        <li>Tongue weight within limits?</li>
+        <li>Trailer weight (GVWR) within limits?</li>
+        <li>Truck weight (GVWR) within limits?</li>
+        <li>Truck &amp; trailer combined weight (GCWR) within limits?</li>
+      </ol>
+      <div style="font-weight:700;margin-top:6px">Other:</div>
+      <ol start="6" style="margin:6px 0 0 18px">
+        <li>Hitch Receiver within limits? Check hitch class rating.</li>
+        <li>Hitch within limits? Check rating on hitch.</li>
+        <li>Hitch ball within limits? Check rating on ball.</li>
+        <li>Truck GAWR's within limits? Check axle loads on truck scale.</li>
+        <li>Trailer GAWR within limits? Check axle loads on truck scale.</li>
+        <li>Truck tires within load limit? Check tire weight rating.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card settings-copy">
+    <h3>About</h3>
+    <div class="muted">
+      <p><b>TowCalc</b> is an offline-first towing calculator you can install on Android (PWA).</p>
+      <ul class="muted">
+        <li>No account, no ads.</li>
+        <li>All data stored locally on your device.</li>
+        <li>Export/Import JSON for backups.</li>
+      </ul>
+      <div class="muted small">Disclaimer: For planning/education. Verify with door sticker, manuals, and scale weights.</div>
+    </div>
+  </div>
 </section>
 
   </main>

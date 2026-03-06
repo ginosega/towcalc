@@ -202,9 +202,26 @@ input.num{text-align:right;font-variant-numeric:tabular-nums}
 #tab-trip .passRow input{ box-sizing:border-box; }
 
 
-/* v38: unify checklist and about fonts */
-#tab-settings .card ul,
-#tab-settings .card p{
-  font-size:14px;
-  line-height:1.5;
+
+/* v39 layout and consistency */
+#tab-trucks .card, #tab-trailers .card, #tab-settings .card, #tab-trip .card, #tab-results .card{max-width:100%;}
+#tab-trucks .row, #tab-trailers .row, #tab-trip .row{align-items:flex-end}
+.actionsRow{margin-top:12px}
+#tab-trucks .panel-head + .card, #tab-trailers .panel-head + .card, #tab-settings .panel-head + .card, #tab-trip .panel-head + .card{margin-top:14px}
+#tab-trucks .card + .card, #tab-trailers .card + .card, #tab-settings .card + .card, #tab-trip .card + .card, #tab-results .card + .card, #tab-results #resultsSummary + .card{margin-top:14px}
+#tab-trucks .meta, #tab-trailers .meta{display:block}
+#tab-trucks .item, #tab-trailers .item{align-items:flex-start}
+#tab-trucks .badge, #tab-trailers .badge{display:none !important}
+#tab-trucks, #tab-trailers{max-width:920px}
+#tab-settings{max-width:920px}
+#tab-settings .settings-copy, #tab-settings .settings-copy p, #tab-settings .settings-copy li, #tab-settings .settings-copy .small{font-size:14px;line-height:1.5}
+.mainlabel{font-weight:700;font-size:13px}
+.helpertext{font-weight:400;font-size:12px}
+.leftnum{text-align:left !important}
+#tab-trip .passRow{display:grid;grid-template-columns:minmax(0,1fr) 110px 44px;gap:10px;align-items:center;width:100%}
+#tab-trip .passRow input{width:100%;min-width:0;box-sizing:border-box}
+#tab-trip .passRow .btn{width:44px;min-width:44px;justify-content:center;padding:0}
+#tab-trip .card{overflow-x:hidden}
+@media (max-width:520px){
+  #tab-trip .passRow{grid-template-columns:minmax(0,1fr) 96px 44px}
 }
