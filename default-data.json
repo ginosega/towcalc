@@ -71,17 +71,12 @@
       },
       {
         "id": "load-default-3",
-        "name": "Passenger",
-        "weight": 120
-      },
-      {
-        "id": "load-default-4",
         "name": "Misc. cargo",
         "weight": 100
       },
       {
-        "id": "load-default-5",
-        "name": "WDH - Equal-i-zer 1,200/12,000 lb",
+        "id": "load-default-4",
+        "name": "WDH",
         "weight": 104
       }
     ],
@@ -103,7 +98,7 @@
       },
       {
         "id": "tload-default-4",
-        "name": "kithen & bath supplies",
+        "name": "Kitchen & bath supplies",
         "weight": 150
       },
       {
