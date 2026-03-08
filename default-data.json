@@ -18,7 +18,7 @@
       "receiverRating": 0,
       "hitchRating": 0,
       "ballRating": 0,
-      "tireRating": 0
+      "tireRating": 2679
     }
   ],
   "trailers": [
@@ -73,23 +73,48 @@
         "id": "load-default-3",
         "name": "Passenger",
         "weight": 120
+      },
+      {
+        "id": "load-default-4",
+        "name": "Misc. cargo",
+        "weight": 100
+      },
+      {
+        "id": "load-default-5",
+        "name": "WDH - Equal-i-zer 1,200/12,000 lb",
+        "weight": 104
       }
     ],
     "trailerLoads": [
       {
         "id": "tload-default-1",
-        "name": "Cargo",
-        "weight": 1000
+        "name": "Camping gear",
+        "weight": 100
       },
       {
         "id": "tload-default-2",
-        "name": "Fresh water",
+        "name": "Food",
         "weight": 100
       },
       {
         "id": "tload-default-3",
-        "name": "Propane",
-        "weight": 37
+        "name": "Clothes",
+        "weight": 100
+      },
+      {
+        "id": "tload-default-4",
+        "name": "kithen & bath supplies",
+        "weight": 150
+      },
+      {
+        "id": "tload-default-5",
+        "name": "Propane - 2 tanks liquid",
+        "weight": 40
+      },
+      {
+        "id": "tload-default-6",
+        "name": "Misc. tools & supplies",
+        "weight": 150
       },
       {
         "id": "tload-default-4",
