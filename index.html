@@ -124,18 +124,18 @@
         <input id="truckName" type="text" placeholder="e.g., 2021 F-150 PowerBoost"/>
       </label>
       <div class="row">
-        <label>GVWR (lbs)
+        <label>GVWR (lbs)<span class="helptext muted">Maximum allowed loaded vehicle weight</span>
           <input id="truckGVWR" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
         </label>
-        <label>GCWR (lbs)
+        <label>GCWR (lbs)<span class="helptext muted">Maximum combined truck + trailer weight</span>
           <input id="truckGCWR" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
         </label>
       </div>
       <div class="row">
-        <label>Payload (lbs)
+        <label>Payload (lbs)<span class="helptext muted">How much weight the truck can carry</span>
           <input id="truckPayload" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
         </label>
-        <label>Towing capacity (lbs)
+        <label>Towing capacity (lbs)<span class="helptext muted">Maximum allowed loaded trailer weight</span>
           <input id="truckTow" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
         </label>
       </div>
@@ -203,7 +203,7 @@
         <input id="trailerName" type="text" placeholder="e.g., Lance 1995"/>
       </label>
       <div class="row">
-        <label>Dry weight (lbs)
+        <label>Dry weight (lbs)<span class="helptext muted">Trailer weight before cargo, water, propane, and batteries</span>
           <input id="trailerDry" type="number" step="1" min="0" inputmode="numeric" class="num leftnum"/>
         </label>
         <label>Dry tongue (lbs)
@@ -296,6 +296,8 @@
         <li>All data stored locally on your device.</li>
         <li>Export/Import JSON for backups.</li>
       </ul>
+      <div class="muted small">TowCalc estimates towing loads based on user-entered values. Actual weights should always be verified using a CAT scale.</div>
+      <div class="muted small">TowCalc was developed with assistance from the Lance Owners community.</div>
       <div class="muted small">Disclaimer: For planning/education. Verify with door sticker, manuals, and scale weights.</div>
     </div>
   </div>
@@ -304,5 +306,20 @@
   </main>
 
   <script src="app.js"></script>
+
+<div id="firstRunSplash" class="splashOverlay hidden">
+  <div class="splashCard">
+    <h2>Welcome to TowCalc</h2>
+    <div class="muted">A quick start for first-time setup:</div>
+    <ol class="splashList">
+      <li>Add your truck on the Trucks page</li>
+      <li>Add your trailer on the Trailers page</li>
+      <li>Enter loads on the Trip page</li>
+      <li>Press Calculate to evaluate towing limits</li>
+    </ol>
+    <button id="btnSplashDismiss" class="btn btn-primary">Get started</button>
+  </div>
+</div>
+
 </body>
 </html>

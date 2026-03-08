@@ -1,4 +1,4 @@
-const CACHE = "towcalc-cache-v41";
+const CACHE = "towcalc-cache-v42";
 const ASSETS = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const ASSETS = [
   "./app.js",
   "./manifest.json",
   "./sw.js",
+  "./default-data.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
 ];
@@ -30,7 +31,8 @@ const APP_SHELL = new Set([
   self.location.origin + "/styles.css",
   self.location.origin + "/app.js",
   self.location.origin + "/manifest.json",
-  self.location.origin + "/sw.js"
+  self.location.origin + "/sw.js",
+  self.location.origin + "/default-data.json"
 ]);
 
 self.addEventListener("fetch", (event) => {
@@ -47,7 +49,8 @@ self.addEventListener("fetch", (event) => {
       url.pathname.endsWith("/styles.css") ||
       url.pathname.endsWith("/app.js") ||
       url.pathname.endsWith("/manifest.json") ||
-      url.pathname.endsWith("/sw.js")
+      url.pathname.endsWith("/sw.js") ||
+      url.pathname.endsWith("/default-data.json")
     )) {
     event.respondWith(
       fetch(req)

@@ -1,5 +1,7 @@
 
 const STORAGE_KEY="towcalc_state_v2";
+const SCHEMA_VERSION=1;
+const FIRST_RUN_KEY="towcalc_first_run_complete";
 let tripDirty=false;
 function uuid(){ if(typeof crypto!=="undefined"&&crypto.randomUUID) return crypto.randomUUID();
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==="x"?r:(r&0x3|0x8);return v.toString(16);  updateTrailerComputed();
@@ -7,30 +9,43 @@ function uuid(){ if(typeof crypto!=="undefined"&&crypto.randomUUID) return crypt
 }
 
 function defaultState(){
-  const truckId=uuid();
-  const trailers=[
-    {id:uuid(),name:"Lance 1995",dry:5273,dryTongue:559,gvwr:7000,freshCap:45},
-    {id:uuid(),name:"Brinkley I 265",dry:7012,dryTongue:650,gvwr:9600,freshCap:55},
-    {id:uuid(),name:"Lance 1985",dry:5259,dryTongue:642,gvwr:7000,freshCap:45},
-    {id:uuid(),name:"Apex Nano",dry:3495,dryTongue:370,gvwr:4700,freshCap:50}];
   return {
+    schemaVersion: SCHEMA_VERSION,
     settings:{warnPct:90},
-    trucks:[{id:truckId,name:"2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",gvwr:7350,gcwr:17000,payload:1391,maxTow:9650,maxTongue:1160,curb:0,rearGawr:4150,frontGawr:3900,receiverRating:0,hitchRating:0,ballRating:0,tireRating:0}],
-    trailers,
-    trip:{truckId, trailerId:trailers[0].id,
-      truckLoads:[{id:uuid(),name:"Driver",weight:180},{id:uuid(),name:"Passenger",weight:150},{id:uuid(),name:"Passenger",weight:120}],
-      twFixedPct:12.5
-    }
+    trucks:[],
+    trailers:[],
+    trip:{truckId:null, trailerId:null, truckLoads:[], trailerLoads:[], twFixedPct:12.5}
   };
 }
 
-let state=loadState();
+let state=defaultState();
 const $=id=>document.getElementById(id);
 const num=v=>{const n=parseFloat(v);return Number.isFinite(n)?n:0;};
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const sum=a=>a.reduce((x,y)=>x+y,0);
 const fmtLb=x=>Math.round(x).toLocaleString()+" lb";
 const fmtPct=x=>(Math.round(x*10)/10).toFixed(1)+"%";
+
+async function loadDefaultData(){
+  try{
+    const resp=await fetch("./default-data.json",{cache:"no-store"});
+    if(!resp.ok) throw new Error("missing");
+    const obj=await resp.json();
+    if(!obj || typeof obj!=="object" || !Array.isArray(obj.trucks) || !Array.isArray(obj.trailers)) throw new Error("malformed");
+    return obj;
+  }catch(_e){
+    return {schemaVersion:SCHEMA_VERSION,settings:{warnPct:90},trucks:[],trailers:[],trip:{truckId:null,trailerId:null,truckLoads:[],trailerLoads:[],twFixedPct:12.5}};
+  }
+}
+
+function normalizeIds(s){
+  if(Array.isArray(s.trucks)) s.trucks.forEach(t=>{ if(!t.id) t.id=uuid(); });
+  if(Array.isArray(s.trailers)) s.trailers.forEach(t=>{ if(!t.id) t.id=uuid(); });
+  if(s.trip && Array.isArray(s.trip.truckLoads)) s.trip.truckLoads.forEach(x=>{ if(!x.id) x.id=uuid(); });
+  if(s.trip && Array.isArray(s.trip.trailerLoads)) s.trip.trailerLoads.forEach(x=>{ if(!x.id) x.id=uuid(); });
+  return s;
+}
+
 
 function setEmptyState(box, msg){
   if(!box) return;
@@ -134,14 +149,26 @@ if(!Array.isArray(s.trip.truckLoads) || s.trip.truckLoads.length===0){
   delete s.trip.presetId;
   return s;
 }
-function loadState(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw) return defaultState();return hydrate(JSON.parse(raw));}catch{return defaultState();}}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    const obj=JSON.parse(raw);
+    return obj && typeof obj==="object" ? obj : null;
+  }catch(_e){
+    return "__MALFORMED__";
+  }
+}
 
-function getTruck(){return state.trucks.find(t=>t.id===state.trip.truckId)||state.trucks[0];}
-function getTrailer(){return state.trailers.find(t=>t.id===state.trip.trailerId)||state.trailers[0];}
+function getTruck(){return state.trucks.find(t=>t.id===state.trip.truckId)||state.trucks[0]||null;}
+function getTrailer(){return state.trailers.find(t=>t.id===state.trip.trailerId)||state.trailers[0]||null;}
 function estimateCurb(truck){const curb=+truck.curb||0;if(curb>0) return curb;return Math.max(0,(+truck.gvwr||0)-(+truck.payload||0));}
 
 function calc(){
   const truck=getTruck(), tr=getTrailer(), set=state.settings, trip=state.trip;
+  if(!truck || !tr){
+    return {truck:truck||{}, tr:tr||{}, set, trip, loadedTrailer:0, trailerLoads:Array.isArray(trip.trailerLoads)?trip.trailerLoads:[], trailerLoadTotalLbs:0, dryRatio:0.12, tongueLow:0, tongueHigh:0, tongueLabel:"Loaded %", truckLoads:Array.isArray(trip.truckLoads)?trip.truckLoads:[], truckLoadTotal:0, payloadUsedHigh:0, payloadRemainingHigh:0, towOk:true, tongueOk:true, gvwrOk:true, gcwrOk:true, trailerGvwrOk:true, curb:0, estTruckWeightHigh:0, gcwrHigh:0, utilization:{payload:0,tongue:0,tow:0,gvwr:0,gcwr:0,trailerGvwr:0}};
+  }
   const trailerLoads = Array.isArray(trip.trailerLoads) ? trip.trailerLoads : [];
   const trailerLoadTotalLbs = sum(trailerLoads.map(x => (+x.weight||0)));
   const loadedTrailer = (+tr.dry||0) + trailerLoadTotalLbs;
@@ -192,6 +219,31 @@ function pillClass(ok, util){
 let selectedTruckId=null, selectedTrailerId=null;
 function ensureSelections(){ if(!selectedTruckId&&state.trucks[0]) selectedTruckId=state.trucks[0].id; if(!selectedTrailerId&&state.trailers[0]) selectedTrailerId=state.trailers[0].id; }
 
+async function initState(){
+  const defaults=normalizeIds(await loadDefaultData());
+  const loaded=loadState();
+  if(loaded==="__MALFORMED__"){
+    state=hydrate(defaults, defaults);
+    saveState();
+    alert("TowCalc was unable to load saved data. Default data has been loaded. If you exported a backup, use Import to restore it.");
+  }else if(loaded){
+    state=hydrate(loaded, defaults);
+    saveState();
+  }else{
+    state=hydrate(defaults, defaults);
+    saveState();
+  }
+}
+
+function maybeShowFirstRunSplash(){
+  const splash=$("firstRunSplash");
+  const btn=$("btnSplashDismiss");
+  if(!splash || !btn) return;
+  if(localStorage.getItem(FIRST_RUN_KEY)==="1"){ splash.classList.add("hidden"); return; }
+  splash.classList.remove("hidden");
+  btn.onclick=()=>{ localStorage.setItem(FIRST_RUN_KEY,"1"); splash.classList.add("hidden"); };
+}
+
 function initTabs(){
   document.querySelectorAll(".tab").forEach(btn=>{
     btn.addEventListener("click", ()=>{
@@ -206,6 +258,7 @@ function initTabs(){
 
 function renderLists(){
   const list=$("truckList"); list.innerHTML="";
+  if(!state.trucks.length) setEmptyState(list, 'No trucks yet. Click "New truck" to add one.');
   state.trucks.forEach(t=>{
     const div=document.createElement("div");
     div.className="item"+(t.id===selectedTruckId?" active":"");
@@ -215,6 +268,7 @@ function renderLists(){
   });
 
   const listT=$("trailerList"); listT.innerHTML="";
+  if(!state.trailers.length) setEmptyState(listT, 'No trailers yet. Click "New trailer" to add one.');
   state.trailers.forEach(tr=>{
     const div=document.createElement("div");
     div.className="item"+(tr.id===selectedTrailerId?" active":"");
@@ -227,7 +281,7 @@ function renderLists(){
 }
 
 function renderTruckForm(){
-  const t=state.trucks.find(x=>x.id===selectedTruckId)||state.trucks[0]; if(!t) return;
+  const t=state.trucks.find(x=>x.id===selectedTruckId)||state.trucks[0]; if(!t){ ["truckName","truckGVWR","truckGCWR","truckPayload","truckTow","truckTongue","truckCurb","truckRearGawr","truckFrontGawr","truckReceiverRating","truckHitchRating","truckBallRating","truckTireRating"].forEach(id=>{ if($(id)) $(id).value=""; }); return; }
   $("truckName").value=t.name||"";
   $("truckGVWR").value=t.gvwr||0;
   $("truckGCWR").value=t.gcwr||0;
@@ -244,7 +298,7 @@ function renderTruckForm(){
 }
 function renderTrailerForm(){
 
-  const tr=state.trailers.find(x=>x.id===selectedTrailerId)||state.trailers[0]; if(!tr) return;
+  const tr=state.trailers.find(x=>x.id===selectedTrailerId)||state.trailers[0]; if(!tr){ ["trailerName","trailerDry","trailerDryTongue","trailerGVWR","trailerFreshCap"].forEach(id=>{ if($(id)) $(id).value=""; }); ["trCalcPayload","trCalcDryTonguePct","trCalcGrossHitch"].forEach(id=>{ if($(id)) $(id).textContent="—"; }); return; }
   $("trailerName").value=tr.name||"";
   $("trailerDry").value=tr.dry||0;
   $("trailerDryTongue").value=tr.dryTongue||0;
@@ -306,11 +360,14 @@ function bindTrailerForm(){
 
 function syncTripSelectors(){
   const selTruck=$("tripTruck"), selTrailer=$("tripTrailer");
-  selTruck.innerHTML=""; state.trucks.forEach(t=>{const o=document.createElement("option");o.value=t.id;o.textContent=t.name||"Unnamed truck";selTruck.appendChild(o);});
-  selTrailer.innerHTML=""; state.trailers.forEach(tr=>{const o=document.createElement("option");o.value=tr.id;o.textContent=tr.name||"Unnamed trailer";selTrailer.appendChild(o);});
-  if(!state.trucks.find(t=>t.id===state.trip.truckId)) state.trip.truckId=state.trucks[0].id;
-  if(!state.trailers.find(t=>t.id===state.trip.trailerId)) state.trip.trailerId=state.trailers[0].id;
-  selTruck.value=state.trip.truckId; selTrailer.value=state.trip.trailerId;
+  selTruck.innerHTML="";
+  state.trucks.forEach(t=>{const o=document.createElement("option");o.value=t.id;o.textContent=t.name||"Unnamed truck";selTruck.appendChild(o);});
+  selTrailer.innerHTML="";
+  state.trailers.forEach(tr=>{const o=document.createElement("option");o.value=tr.id;o.textContent=tr.name||"Unnamed trailer";selTrailer.appendChild(o);});
+  if(!state.trucks.find(t=>t.id===state.trip.truckId)) state.trip.truckId=state.trucks[0]?.id||"";
+  if(!state.trailers.find(t=>t.id===state.trip.trailerId)) state.trip.trailerId=state.trailers[0]?.id||"";
+  selTruck.value=state.trip.truckId||"";
+  selTrailer.value=state.trip.trailerId||"";
 }
 
 
@@ -319,6 +376,7 @@ function renderTruckLoads(){
   if(!box) return;
   box.innerHTML = "";
   if(!Array.isArray(state.trip.truckLoads)) state.trip.truckLoads = [];
+  if(!state.trip.truckLoads.length) setEmptyState(box, 'No truck loads yet. Click "Add load" to add one.');
   state.trip.truckLoads.forEach(item=>{
     const row = document.createElement("div");
     row.className = "passRow";
@@ -329,9 +387,6 @@ function renderTruckLoads(){
     `;
     row.querySelector("button").onclick = ()=>{
       state.trip.truckLoads = state.trip.truckLoads.filter(x=>x.id!==item.id);
-      if(state.trip.truckLoads.length===0){
-        state.trip.truckLoads = [{ id: uuid(), name:"Load", weight:0 }];
-      }
       saveState(); renderTruckLoads(); markTripDirty();
     };
     row.querySelector(".truckLoadName").oninput = (e)=>{
@@ -354,6 +409,7 @@ function renderTrailerLoads(){
   if(!box) return;
   box.innerHTML = "";
   if(!Array.isArray(state.trip.trailerLoads)) state.trip.trailerLoads = [];
+  if(!state.trip.trailerLoads.length) setEmptyState(box, 'No trailer loads yet. Click "Add load" to add one.');
   state.trip.trailerLoads.forEach(item=>{
     const row = document.createElement("div");
     row.className = "passRow";
@@ -364,9 +420,6 @@ function renderTrailerLoads(){
     `;
     row.querySelector("button").onclick = ()=>{
       state.trip.trailerLoads = state.trip.trailerLoads.filter(x=>x.id!==item.id);
-      if(state.trip.trailerLoads.length===0){
-        state.trip.trailerLoads = [{ id: uuid(), name:"Load", weight:0 }];
-      }
       saveState(); renderTrailerLoads(); markTripDirty();
     };
     row.querySelector(".trailerLoadName").oninput = (e)=>{
@@ -384,7 +437,7 @@ function renderTrailerLoads(){
 }
 
 function renderTrip(){
-  $("twFixedPct").value=state.trip.twFixedPct;
+  $("twFixedPct").value=state.trip.twFixedPct ?? 12.5;
   renderTruckLoads();
   renderTrailerLoads();
 }
@@ -455,6 +508,13 @@ function renderUtilMeters(r){
 
 function renderResults(){
   const r=calc();
+  if(!getTruck() || !getTrailer()){
+    $("resultsSummary").innerHTML="";
+    $("resultsDetails").innerHTML=`<div class="card"><div class="label muted small">Selected</div><div><b>Add a truck and trailer</b> to start using TowCalc.</div></div>`;
+    $("warnings").innerHTML=`<div class="warnItem"><div class="warnTitle">No data yet</div><div class="muted small">Add a truck and trailer, then enter trip loads.</div></div>`;
+    const util=$("utilChart"); if(util) util.innerHTML=`<div class="muted small">Utilization appears here after you add a truck and trailer.</div>`;
+    return;
+  }
   const hintEl = $("dryRatioHint");
   if(hintEl){ hintEl.textContent = `Dry ratio (dry tongue ÷ dry weight) for this trailer is ${(r.dryRatio*100).toFixed(1)}%`; }
 
@@ -640,7 +700,8 @@ function bindBackup(){
     const f=e.target.files?.[0]; if(!f) return;
     try{
       const obj=JSON.parse(await f.text());
-      state=hydrate(obj);
+      const defaults=await loadDefaultData();
+      state=hydrate(obj, defaults);
       ensureSelections();
       selectedTruckId=state.trucks[0]?.id||null; selectedTrailerId=state.trailers[0]?.id||null;
       saveState(); boot(true);
@@ -648,12 +709,13 @@ function bindBackup(){
     }catch(err){ alert("Import failed: "+err); }
     finally{ e.target.value=""; }
   });
-  $("btnReset").onclick=()=>{
+  $("btnReset").onclick=async ()=>{
     if(!confirm("Reset TowCalc? This deletes local data on this device.")) return;
     localStorage.removeItem(STORAGE_KEY);
-    state=defaultState();
+    const defaults=await loadDefaultData();
+    state=hydrate(defaults, defaults);
     ensureSelections();
-    selectedTruckId=state.trucks[0].id; selectedTrailerId=state.trailers[0].id;
+    selectedTruckId=state.trucks[0]?.id||null; selectedTrailerId=state.trailers[0]?.id||null;
     saveState(); boot(true);
   };
 }
@@ -708,7 +770,13 @@ function boot(rerender=false){
   if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(()=>{});
   }
+  maybeShowFirstRunSplash();
 }
 
-boot();
+async function startApp(){
+  await initState();
+  boot();
+}
+
+startApp();
 function drawUtilChart(r){ try{ renderUtilMeters(r); }catch(e){} }

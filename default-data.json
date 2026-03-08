@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "settings": {
+    "warnPct": 90
+  },
+  "trucks": [
+    {
+      "id": "truck-default-1",
+      "name": "2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",
+      "gvwr": 7350,
+      "gcwr": 17000,
+      "payload": 1391,
+      "maxTow": 9650,
+      "maxTongue": 1160,
+      "curb": 0,
+      "rearGawr": 4150,
+      "frontGawr": 3900,
+      "receiverRating": 0,
+      "hitchRating": 0,
+      "ballRating": 0,
+      "tireRating": 0
+    }
+  ],
+  "trailers": [
+    {
+      "id": "trailer-default-1",
+      "name": "Lance 1995",
+      "dry": 5273,
+      "dryTongue": 559,
+      "gvwr": 7000,
+      "freshCap": 45
+    },
+    {
+      "id": "trailer-default-2",
+      "name": "Brinkley I 265",
+      "dry": 7012,
+      "dryTongue": 650,
+      "gvwr": 9600,
+      "freshCap": 55
+    },
+    {
+      "id": "trailer-default-3",
+      "name": "Lance 1985",
+      "dry": 5259,
+      "dryTongue": 642,
+      "gvwr": 7000,
+      "freshCap": 45
+    },
+    {
+      "id": "trailer-default-4",
+      "name": "Apex Nano",
+      "dry": 3495,
+      "dryTongue": 370,
+      "gvwr": 4700,
+      "freshCap": 50
+    }
+  ],
+  "trip": {
+    "truckId": "truck-default-1",
+    "trailerId": "trailer-default-1",
+    "truckLoads": [
+      {
+        "id": "load-default-1",
+        "name": "Driver",
+        "weight": 180
+      },
+      {
+        "id": "load-default-2",
+        "name": "Passenger",
+        "weight": 150
+      },
+      {
+        "id": "load-default-3",
+        "name": "Passenger",
+        "weight": 120
+      }
+    ],
+    "trailerLoads": [
+      {
+        "id": "tload-default-1",
+        "name": "Cargo",
+        "weight": 1000
+      },
+      {
+        "id": "tload-default-2",
+        "name": "Fresh water",
+        "weight": 100
+      },
+      {
+        "id": "tload-default-3",
+        "name": "Propane",
+        "weight": 37
+      },
+      {
+        "id": "tload-default-4",
+        "name": "Batteries",
+        "weight": 72
+      }
+    ],
+    "twFixedPct": 12.5
+  }
+}
