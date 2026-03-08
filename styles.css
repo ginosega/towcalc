@@ -233,3 +233,5 @@ input.num{text-align:right;font-variant-numeric:tabular-nums}
 .splashCard h2{margin:0 0 8px 0}
 .splashList{margin:10px 0 16px 22px;padding:0}
 .splashList li{margin:6px 0}
+
+.splashOverlay.hidden{display:none !important}
