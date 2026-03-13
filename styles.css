@@ -310,3 +310,59 @@ input.num{text-align:right;font-variant-numeric:tabular-nums}
   justify-content:center;
 }
 
+
+
+/* v1.1.5 results equal-height cards */
+#resultsSummary.cards{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin-top:14px;
+  margin-bottom:16px !important;
+}
+@media (min-width:920px){
+  #resultsSummary.cards{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-auto-rows:minmax(132px,auto);
+  }
+}
+#resultsSummary > .kpi{
+  display:grid !important;
+  grid-template-rows:auto minmax(52px,auto) minmax(32px,auto) auto;
+  align-content:start;
+  height:100%;
+}
+#resultsSummary > .kpi .value{
+  min-height:52px;
+}
+#resultsSummary > .kpi .sub{
+  min-height:32px;
+}
+#resultsSummary > .kpi .pill{
+  align-self:end;
+  margin-top:8px;
+}
+
+#resultsSummary + .card{
+  margin-top:16px !important;
+}
+
+#resultsDetails.details{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+@media (min-width:920px){
+  #resultsDetails.details{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-auto-rows:minmax(86px,auto);
+  }
+}
+#resultsDetails > .card{
+  display:grid !important;
+  grid-template-rows:auto 1fr;
+  align-content:start;
+  min-height:86px;
+  height:100%;
+}
+
