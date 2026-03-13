@@ -745,7 +745,7 @@ function bindSaveButtons(){
     renderResults();
     clearTruckDirty();
     activateTab("tab-trucks");
-    scrollTopNow();
+    scrollPanelTop("tab-trucks");
   };
   const btnTrailer=$("btnSaveTrailer");
   if(btnTrailer) btnTrailer.onclick=()=>{
@@ -756,7 +756,7 @@ function bindSaveButtons(){
     renderResults();
     clearTrailerDirty();
     activateTab("tab-trailers");
-    scrollTopNow();
+    scrollPanelTop("tab-trailers");
   };
 }
 
@@ -767,7 +767,7 @@ function bindCalculate(){
     clearTripDirty();
     renderResults();
     activateTab("tab-results");
-    scrollTopNow();
+    scrollPanelTop("tab-results");
   };
 }
 

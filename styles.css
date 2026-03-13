@@ -235,3 +235,9 @@ input.num{text-align:right;font-variant-numeric:tabular-nums}
 .splashList li{margin:6px 0}
 
 .splashOverlay.hidden{display:none !important}
+
+/* v1.1.2 layout polish */
+.cards{align-items:stretch}
+.cards>.card{height:100%;display:flex;flex-direction:column}
+.details{align-items:stretch}
+.details>.card{height:100%;display:flex;flex-direction:column}
