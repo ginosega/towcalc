@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "settings": {
+    "warnPct": 90
+  },
+  "trucks": [
+    {
+      "id": "truck-default-1",
+      "name": "2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",
+      "gvwr": 7350,
+      "gcwr": 17000,
+      "payload": 1391,
+      "maxTow": 9650,
+      "maxTongue": 1160,
+      "curb": 0,
+      "rearGawr": 4150,
+      "frontGawr": 3900,
+      "receiverRating": 0,
+      "hitchRating": 0,
+      "ballRating": 0,
+      "tireRating": 2679
+    }
+  ],
+  "trailers": [
+    {
+      "id": "26679495-9204-4b6d-8b1c-0dd43f08a004",
+      "name": "Lance 2255",
+      "dry": 5425,
+      "dryTongue": 590,
+      "gvwr": 8000,
+      "freshCap": 45
+    },
+    {
+      "id": "trailer-default-1",
+      "name": "Lance 1995",
+      "dry": 5273,
+      "dryTongue": 559,
+      "gvwr": 7000,
+      "freshCap": 45
+    }
+  ],
+  "trip": {
+    "truckId": "truck-default-1",
+    "trailerId": "26679495-9204-4b6d-8b1c-0dd43f08a004",
+    "truckLoads": [
+      {
+        "id": "load-default-1",
+        "name": "Gino",
+        "weight": 215
+      },
+      {
+        "id": "load-default-2",
+        "name": "Cristina ",
+        "weight": 170
+      },
+      {
+        "id": "load-default-3",
+        "name": "Jacob",
+        "weight": 130
+      },
+      {
+        "id": "load-default-4",
+        "name": "Cargo",
+        "weight": 100
+      },
+      {
+        "id": "c99d4188-7a7e-4d18-8881-d157fb214533",
+        "name": "Tonneau cover ",
+        "weight": 138
+      },
+      {
+        "id": "b4a2bd92-7f81-425a-bc53-0b0306146fe6",
+        "name": "Hitch",
+        "weight": 104
+      },
+      {
+        "id": "91301312-6204-48b9-afde-900fed467e10",
+        "name": "Minus spare tire",
+        "weight": -80
+      }
+    ],
+    "trailerLoads": [
+      {
+        "id": "tload-default-1",
+        "name": "Camping gear",
+        "weight": 100
+      },
+      {
+        "id": "tload-default-2",
+        "name": "Food",
+        "weight": 100
+      },
+      {
+        "id": "tload-default-3",
+        "name": "Clothes",
+        "weight": 100
+      },
+      {
+        "id": "tload-default-4",
+        "name": "Kitchen & bath supplies",
+        "weight": 150
+      },
+      {
+        "id": "tload-default-5",
+        "name": "Propane - 2 tanks liquid",
+        "weight": 40
+      },
+      {
+        "id": "tload-default-6",
+        "name": "Misc. tools & supplies",
+        "weight": 150
+      },
+      {
+        "id": "tload-default-4",
+        "name": "Batteries",
+        "weight": 72
+      },
+      {
+        "id": "dea57fb2-1091-44b2-96a1-805ec9ce5de9",
+        "name": "Spare tire",
+        "weight": 80
+      }
+    ],
+    "twFixedPct": 12.5
+  }
+}

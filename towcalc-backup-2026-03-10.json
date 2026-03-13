@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "settings": {
+    "warnPct": 90
+  },
+  "trucks": [
+    {
+      "id": "truck-default-1",
+      "name": "2021 Ford F-150 Lariat PowerBoost",
+      "gvwr": 7350,
+      "gcwr": 17000,
+      "payload": 1391,
+      "maxTow": 9650,
+      "maxTongue": 1160,
+      "curb": 0,
+      "rearGawr": 4150,
+      "frontGawr": 3900,
+      "receiverRating": 0,
+      "hitchRating": 0,
+      "ballRating": 0,
+      "tireRating": 2679
+    }
+  ],
+  "trailers": [
+    {
+      "id": "trailer-default-1",
+      "name": "Lance 1995",
+      "dry": 5273,
+      "dryTongue": 559,
+      "gvwr": 7000,
+      "freshCap": 45
+    },
+    {
+      "id": "trailer-default-2",
+      "name": "Brinkley I 265",
+      "dry": 7012,
+      "dryTongue": 650,
+      "gvwr": 9600,
+      "freshCap": 55
+    },
+    {
+      "id": "trailer-default-3",
+      "name": "Lance 1985",
+      "dry": 5259,
+      "dryTongue": 642,
+      "gvwr": 7000,
+      "freshCap": 45
+    },
+    {
+      "id": "trailer-default-4",
+      "name": "Apex Nano",
+      "dry": 3495,
+      "dryTongue": 370,
+      "gvwr": 4700,
+      "freshCap": 50
+    }
+  ],
+  "trip": {
+    "truckId": "truck-default-1",
+    "trailerId": "trailer-default-1",
+    "truckLoads": [
+      {
+        "id": "load-default-1",
+        "name": "Gino",
+        "weight": 215
+      },
+      {
+        "id": "load-default-2",
+        "name": "Cristina",
+        "weight": 170
+      },
+      {
+        "id": "load-default-3",
+        "name": "Jacob",
+        "weight": 130
+      },
+      {
+        "id": "load-default-4",
+        "name": "Misc. cargo",
+        "weight": 60
+      },
+      {
+        "id": "e79cb8f3-af6e-482e-af8b-40d7485751a2",
+        "name": "Tonneau cover",
+        "weight": 138
+      },
+      {
+        "id": "7acb95f2-2b81-493d-a875-d06bd8f88c28",
+        "name": "Hitch",
+        "weight": 104
+      },
+      {
+        "id": "b29ef0dd-7d4b-42b9-9aae-5fd0b4b6d1f0",
+        "name": "Minus spare tire ",
+        "weight": -80
+      }
+    ],
+    "trailerLoads": [
+      {
+        "id": "tload-default-1",
+        "name": "Camping gear",
+        "weight": 100
+      },
+      {
+        "id": "tload-default-2",
+        "name": "Food",
+        "weight": 100
+      },
+      {
+        "id": "tload-default-3",
+        "name": "Clothes",
+        "weight": 100
+      },
+      {
+        "id": "tload-default-4",
+        "name": "Kitchen & bath supplies",
+        "weight": 150
+      },
+      {
+        "id": "tload-default-5",
+        "name": "Propane - 2 tanks liquid",
+        "weight": 40
+      },
+      {
+        "id": "tload-default-6",
+        "name": "Misc. tools & supplies",
+        "weight": 150
+      },
+      {
+        "id": "tload-default-4",
+        "name": "Batteries",
+        "weight": 72
+      },
+      {
+        "id": "e9792538-d8a9-44c0-bd9f-dd727ee33fe7",
+        "name": "Spare tire",
+        "weight": 80
+      }
+    ],
+    "twFixedPct": 12.5
+  }
+}
