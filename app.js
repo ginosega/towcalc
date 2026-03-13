@@ -442,6 +442,7 @@ function renderTruckLoads(){
     };
     box.appendChild(row);
   });
+  bindNumericFieldUx();
 }
 
 
@@ -492,7 +493,7 @@ function bindTrip(){
     btnAdd.onclick = ()=>{
       if(!Array.isArray(state.trip.truckLoads)) state.trip.truckLoads = [];
       state.trip.truckLoads.push({ id: uuid(), name:"Load", weight:0 });
-      saveState(); renderTruckLoads(); markTripDirty();
+      saveState(); renderTruckLoads(); bindNumericFieldUx(); markTripDirty();
       requestAnimationFrame(()=>{
         const rows=[...document.querySelectorAll('#truckLoads .passRow')];
         const last=rows[rows.length-1];
@@ -510,7 +511,7 @@ function bindTrip(){
     btnAddTrailer.onclick = ()=>{
       if(!Array.isArray(state.trip.trailerLoads)) state.trip.trailerLoads = [];
       state.trip.trailerLoads.push({ id: uuid(), name:"Load", weight:0 });
-      saveState(); renderTrailerLoads(); markTripDirty();
+      saveState(); renderTrailerLoads(); bindNumericFieldUx(); markTripDirty();
       requestAnimationFrame(()=>{
         const rows=[...document.querySelectorAll('#trailerLoads .passRow')];
         const last=rows[rows.length-1];
