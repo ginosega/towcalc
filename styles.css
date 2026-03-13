@@ -235,3 +235,216 @@ input.num{text-align:right;font-variant-numeric:tabular-nums}
 .splashList li{margin:6px 0}
 
 .splashOverlay.hidden{display:none !important}
+
+/* v1.1.2 layout polish */
+.cards{align-items:stretch}
+.cards>.card{height:100%;display:flex;flex-direction:column}
+.details{align-items:stretch}
+.details>.card{height:100%;display:flex;flex-direction:column}
+
+
+
+#resultsSummary{
+  margin-top:14px;
+  margin-bottom:14px;
+}
+#resultsSummary.cards{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  align-items:stretch;
+}
+@media (min-width:920px){
+  #resultsSummary.cards{
+    grid-template-columns:repeat(3, minmax(0,1fr));
+  }
+}
+#resultsSummary > .card{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+#resultsDetails.details{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  align-items:stretch;
+}
+@media (min-width:920px){
+  #resultsDetails.details{
+    grid-template-columns:repeat(2, minmax(0,1fr));
+  }
+}
+#resultsDetails > .card{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+
+
+#resultsSummary.cards{
+  margin-bottom:16px !important;
+  grid-auto-rows:1fr;
+}
+#resultsSummary > .card{
+  min-height:126px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+#resultsSummary > .card .pill{
+  margin-top:auto;
+}
+#resultsSummary + .card{
+  margin-top:16px;
+}
+#resultsDetails.details{
+  grid-auto-rows:1fr;
+}
+#resultsDetails > .card{
+  min-height:84px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+
+
+
+#resultsSummary.cards{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin-top:14px;
+  margin-bottom:16px !important;
+}
+@media (min-width:920px){
+  #resultsSummary.cards{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-auto-rows:minmax(132px,auto);
+  }
+}
+#resultsSummary > .kpi{
+  display:grid !important;
+  grid-template-rows:auto minmax(52px,auto) minmax(32px,auto) auto;
+  align-content:start;
+  height:100%;
+}
+#resultsSummary > .kpi .value{
+  min-height:52px;
+}
+#resultsSummary > .kpi .sub{
+  min-height:32px;
+}
+#resultsSummary > .kpi .pill{
+  align-self:end;
+  margin-top:8px;
+}
+
+#resultsSummary + .card{
+  margin-top:16px !important;
+}
+
+#resultsDetails.details{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+@media (min-width:920px){
+  #resultsDetails.details{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-auto-rows:minmax(86px,auto);
+  }
+}
+#resultsDetails > .card{
+  display:grid !important;
+  grid-template-rows:auto 1fr;
+  align-content:start;
+  min-height:86px;
+  height:100%;
+}
+
+
+
+
+
+/* v1.1.9 dedicated results layout */
+#resultsSummary.cards{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin-bottom:14px;
+}
+@media (min-width:920px){
+  #resultsSummary.cards{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    align-items:start;
+  }
+}
+#resultsSummary .resultCard{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  display:flex;
+  flex-direction:column;
+  min-height:146px;
+}
+#resultsSummary .resultCardLabel{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:6px;
+}
+#resultsSummary .resultCardValue{
+  font-size:20px;
+  font-weight:900;
+  line-height:1.2;
+  margin-bottom:8px;
+}
+#resultsSummary .resultCardSub{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.35;
+  margin-bottom:10px;
+}
+#resultsSummary .resultCardPill{
+  margin-top:auto;
+  align-self:flex-start;
+}
+#resultsSummary + .card{
+  margin-top:14px !important;
+}
+
+#resultsDetails.details{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+@media (min-width:920px){
+  #resultsDetails.details{
+    grid-template-columns:1fr 1fr;
+  }
+}
+#resultsDetails .resultDetailCard{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  min-height:84px;
+}
+#resultsDetails .resultDetailLabel{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+#resultsDetails .resultDetailBody{
+  font-size:14px;
+  line-height:1.4;
+}
+

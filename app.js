@@ -93,6 +93,35 @@ function activateTab(tabId){
   document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active", p.id===tabId));
 }
 
+function scrollTopNow(){
+  try{
+    window.scrollTo({top:0,left:0,behavior:"auto"});
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }catch(_e){}
+}
+
+function scrollPanelTop(tabId){
+  const panel = tabId ? document.getElementById(tabId) : null;
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      scrollTopNow();
+      if(panel){
+        try{ panel.scrollIntoView({block:"start", inline:"nearest"}); }catch(_e){}
+      }
+      scrollTopNow();
+    });
+  });
+}
+
+function focusTextEnd(el){
+  if(!el) return;
+  el.focus();
+  const val = el.value || "";
+  try{ el.setSelectionRange(val.length, val.length); }catch(_e){}
+}
+
+
 
 function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
 function hydrate(s){
@@ -218,6 +247,17 @@ function pillClass(ok, util){
 
 let selectedTruckId=null, selectedTrailerId=null;
 function ensureSelections(){ if(!selectedTruckId&&state.trucks[0]) selectedTruckId=state.trucks[0].id; if(!selectedTrailerId&&state.trailers[0]) selectedTrailerId=state.trailers[0].id; }
+
+
+function bindNumericFieldUx(){
+  document.querySelectorAll('#tab-trip input[type="number"], #tab-trucks input[type="number"], #tab-trailers input[type="number"], #tab-settings input[type="number"]').forEach(el=>{
+    if(el.dataset.zeroUxBound==="1") return;
+    el.dataset.zeroUxBound="1";
+    el.addEventListener("focus", ()=>{
+      if(el.value==="0" || el.value==="0.0" || el.value==="0.00") el.value="";
+    });
+  });
+}
 
 async function initState(){
   const defaults=normalizeIds(await loadDefaultData());
@@ -508,6 +548,8 @@ function renderUtilMeters(r){
 
 function renderResults(){
   const r=calc();
+  const hdr=$("resultsHeaderText");
+  if(hdr){ const t=getTruck(), tr=getTrailer(); hdr.innerHTML=(t&&tr)?`<b>${escapeHtml(t.name||"Truck")}</b> towing <b>${escapeHtml(tr.name||"Trailer")}</b>`:"Add a truck and trailer to begin."; }
   if(!getTruck() || !getTrailer()){
     $("resultsSummary").innerHTML="";
     $("resultsDetails").innerHTML=`<div class="card"><div class="label muted small">Selected</div><div><b>Add a truck and trailer</b> to start using TowCalc.</div></div>`;
@@ -602,18 +644,15 @@ const wrap=$("resultsSummary"); wrap.innerHTML="";
   cards.forEach(c=>{
     const div=document.createElement("div");
     const klass=pillClass(c.ok,c.util);
-    div.className="card kpi";
-    div.innerHTML=`<div class="label">${escapeHtml(c.title)}</div><div class="value">${escapeHtml(c.value)}</div><div class="sub">${escapeHtml(c.sub)}</div><div class="pill ${klass}">${klass==="ok"?"OK":(klass==="warn"?"CAUTION":"OVER LIMIT")}</div>`;
+    div.className="resultCard";
+    div.innerHTML=`<div class="resultCardLabel">${escapeHtml(c.title)}</div><div class="resultCardValue">${escapeHtml(c.value)}</div><div class="resultCardSub">${escapeHtml(c.sub)}</div><div class="pill ${klass} resultCardPill">${klass==="ok"?"OK":(klass==="warn"?"CAUTION":"OVER LIMIT")}</div>`;
     wrap.appendChild(div);
   });
 
     
 $("resultsDetails").innerHTML=`
-  <div class="card"><div class="label muted small">Selected</div><div><b>${escapeHtml(r.truck.name||"Truck")}</b> towing <b>${escapeHtml(r.tr.name||"Trailer")}</b></div></div>
-  <div class="card"><div class="label muted small">Load breakdown</div>
-    <div class="muted small">Truck loads: ${fmtLb(r.truckLoadTotal)}</div>
-    <div class="muted small">Trailer loads: ${fmtLb(r.trailerLoadTotalLbs)}</div>
-  </div>
+  <div class="resultDetailCard"><div class="resultDetailLabel">Selected</div><div class="resultDetailBody"><b>${escapeHtml(r.truck.name||"Truck")}</b> towing <b>${escapeHtml(r.tr.name||"Trailer")}</b></div></div>
+  <div class="resultDetailCard"><div class="resultDetailLabel">Load breakdown</div><div class="resultDetailBody"><div class="muted small">Truck loads: ${fmtLb(r.truckLoadTotal)}</div><div class="muted small">Trailer loads: ${fmtLb(r.trailerLoadTotalLbs)}</div></div></div>
 `;
 
   const w=[];
@@ -657,7 +696,7 @@ if((+r.truck.ballRating||0)>0 && r.tongueHigh>(+r.truck.ballRating||0)) w.push({
 function bindCrud(){
   $("btnNewTruck").onclick=()=>{
     const t={id:uuid(),name:"New truck",gvwr:0,gcwr:0,payload:0,maxTow:0,maxTongue:0,curb:0,rearGawr:0,frontGawr:0,receiverRating:0,hitchRating:0,ballRating:0,tireRating:0};
-    state.trucks.unshift(t); selectedTruckId=t.id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); markTruckDirty();
+    state.trucks.unshift(t); selectedTruckId=t.id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); markTruckDirty(); focusTextEnd($("truckName"));
   };
   $("btnDelTruck").onclick=()=>{
     const t=state.trucks.find(x=>x.id===selectedTruckId);
@@ -672,7 +711,7 @@ function bindCrud(){
 
   $("btnNewTrailer").onclick=()=>{
     const tr={id:uuid(),name:"New trailer",dry:0,dryTongue:0,gvwr:0,freshCap:0};
-    state.trailers.unshift(tr); selectedTrailerId=tr.id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); updateTrailerComputed(); markTrailerDirty();
+    state.trailers.unshift(tr); selectedTrailerId=tr.id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); updateTrailerComputed(); markTrailerDirty(); focusTextEnd($("trailerName"));
   };
   $("btnDelTrailer").onclick=()=>{
     const t=state.trailers.find(x=>x.id===selectedTrailerId);
@@ -725,9 +764,26 @@ function bindBackup(){
 
 function bindSaveButtons(){
   const btnTruck=$("btnSaveTruck");
-  if(btnTruck) btnTruck.onclick=()=>{ clearTruckDirty(); renderResults(); activateTab("tab-results"); };
+  if(btnTruck) btnTruck.onclick=()=>{
+    renderLists();
+    renderTruckForm();
+    syncTripSelectors();
+    renderResults();
+    clearTruckDirty();
+    activateTab("tab-trucks");
+    scrollPanelTop("tab-trucks");
+  };
   const btnTrailer=$("btnSaveTrailer");
-  if(btnTrailer) btnTrailer.onclick=()=>{ clearTrailerDirty(); renderResults(); activateTab("tab-results"); };
+  if(btnTrailer) btnTrailer.onclick=()=>{
+    renderLists();
+    renderTrailerForm();
+    syncTripSelectors();
+    updateTrailerComputed();
+    renderResults();
+    clearTrailerDirty();
+    activateTab("tab-trailers");
+    scrollPanelTop("tab-trailers");
+  };
 }
 
 function bindCalculate(){
@@ -737,6 +793,7 @@ function bindCalculate(){
     clearTripDirty();
     renderResults();
     activateTab("tab-results");
+    scrollPanelTop("tab-results");
   };
 }
 
@@ -755,6 +812,7 @@ function boot(rerender=false){
   clearTruckDirty();
   clearTrailerDirty();
   clearTripDirty();
+  bindNumericFieldUx();
 
   if(rerender) return;
 
@@ -766,6 +824,7 @@ function boot(rerender=false){
   bindSaveButtons();
   bindCrud();
   bindBackup();
+  bindNumericFieldUx();
 
   if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(()=>{});
