@@ -280,3 +280,33 @@ input.num{text-align:right;font-variant-numeric:tabular-nums}
   display:flex;
   flex-direction:column;
 }
+
+
+/* v1.1.4 results card sizing/spacing */
+#resultsSummary.cards{
+  margin-bottom:16px !important;
+  grid-auto-rows:1fr;
+}
+#resultsSummary > .card{
+  min-height:126px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+#resultsSummary > .card .pill{
+  margin-top:auto;
+}
+#resultsSummary + .card{
+  margin-top:16px;
+}
+#resultsDetails.details{
+  grid-auto-rows:1fr;
+}
+#resultsDetails > .card{
+  min-height:84px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
