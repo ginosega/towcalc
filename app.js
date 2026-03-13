@@ -112,6 +112,7 @@ function scrollPanelTop(tabId){
       scrollTopNow();
     });
   });
+  bindNumericFieldUx();
 }
 
 function focusTextEnd(el){
@@ -427,7 +428,7 @@ function renderTruckLoads(){
     `;
     row.querySelector("button").onclick = ()=>{
       state.trip.truckLoads = state.trip.truckLoads.filter(x=>x.id!==item.id);
-      saveState(); renderTruckLoads(); markTripDirty();
+      saveState(); renderTruckLoads(); bindNumericFieldUx(); markTripDirty();
     };
     row.querySelector(".truckLoadName").oninput = (e)=>{
       const id = e.target.dataset.id;
@@ -460,7 +461,7 @@ function renderTrailerLoads(){
     `;
     row.querySelector("button").onclick = ()=>{
       state.trip.trailerLoads = state.trip.trailerLoads.filter(x=>x.id!==item.id);
-      saveState(); renderTrailerLoads(); markTripDirty();
+      saveState(); renderTrailerLoads(); bindNumericFieldUx(); markTripDirty();
     };
     row.querySelector(".trailerLoadName").oninput = (e)=>{
       const id = e.target.dataset.id;
