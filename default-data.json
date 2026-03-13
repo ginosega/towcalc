@@ -6,7 +6,7 @@
   "trucks": [
     {
       "id": "truck-default-1",
-      "name": "2021 Ford F-150 PowerBoost Lariat 4x4 (5.5' bed)",
+      "name": "2021 Ford F-150 Lariat PowerBoost",
       "gvwr": 7350,
       "gcwr": 17000,
       "payload": 1391,
@@ -48,11 +48,11 @@
     },
     {
       "id": "trailer-default-4",
-      "name": "Apex Nano",
-      "dry": 3495,
-      "dryTongue": 370,
-      "gvwr": 4700,
-      "freshCap": 50
+      "name": "Apex Nano 203RBK",
+      "dry": 4158,
+      "dryTongue": 530,
+      "gvwr": 6000,
+      "freshCap": 52
     }
   ],
   "trip": {
@@ -62,7 +62,7 @@
       {
         "id": "load-default-1",
         "name": "Driver",
-        "weight": 180
+        "weight": 200
       },
       {
         "id": "load-default-2",
@@ -71,12 +71,12 @@
       },
       {
         "id": "load-default-3",
-        "name": "Misc. cargo",
+        "name": "Cargo",
         "weight": 100
       },
       {
         "id": "load-default-4",
-        "name": "WDH",
+        "name": "Hitch",
         "weight": 104
       }
     ],
@@ -103,18 +103,18 @@
       },
       {
         "id": "tload-default-5",
-        "name": "Propane - 2 tanks liquid",
+        "name": "Propane",
         "weight": 40
       },
       {
         "id": "tload-default-6",
-        "name": "Misc. tools & supplies",
+        "name": "Tools & supplies",
         "weight": 150
       },
       {
         "id": "tload-default-4",
         "name": "Batteries",
-        "weight": 72
+        "weight": 75
       }
     ],
     "twFixedPct": 12.5

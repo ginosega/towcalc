@@ -508,6 +508,8 @@ function renderUtilMeters(r){
 
 function renderResults(){
   const r=calc();
+  const hdr=$("resultsHeaderText");
+  if(hdr){ const t=getTruck(), tr=getTrailer(); hdr.innerHTML=(t&&tr)?`<b>${escapeHtml(t.name||"Truck")}</b> towing <b>${escapeHtml(tr.name||"Trailer")}</b>`:"Add a truck and trailer to begin."; }
   if(!getTruck() || !getTrailer()){
     $("resultsSummary").innerHTML="";
     $("resultsDetails").innerHTML=`<div class="card"><div class="label muted small">Selected</div><div><b>Add a truck and trailer</b> to start using TowCalc.</div></div>`;
@@ -657,7 +659,7 @@ if((+r.truck.ballRating||0)>0 && r.tongueHigh>(+r.truck.ballRating||0)) w.push({
 function bindCrud(){
   $("btnNewTruck").onclick=()=>{
     const t={id:uuid(),name:"New truck",gvwr:0,gcwr:0,payload:0,maxTow:0,maxTongue:0,curb:0,rearGawr:0,frontGawr:0,receiverRating:0,hitchRating:0,ballRating:0,tireRating:0};
-    state.trucks.unshift(t); selectedTruckId=t.id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); markTruckDirty();
+    state.trucks.unshift(t); selectedTruckId=t.id; saveState(); renderLists(); renderTruckForm(); syncTripSelectors(); markTruckDirty(); focusTextEnd($("truckName"));
   };
   $("btnDelTruck").onclick=()=>{
     const t=state.trucks.find(x=>x.id===selectedTruckId);
@@ -672,7 +674,7 @@ function bindCrud(){
 
   $("btnNewTrailer").onclick=()=>{
     const tr={id:uuid(),name:"New trailer",dry:0,dryTongue:0,gvwr:0,freshCap:0};
-    state.trailers.unshift(tr); selectedTrailerId=tr.id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); updateTrailerComputed(); markTrailerDirty();
+    state.trailers.unshift(tr); selectedTrailerId=tr.id; saveState(); renderLists(); renderTrailerForm(); syncTripSelectors(); updateTrailerComputed(); markTrailerDirty(); focusTextEnd($("trailerName"));
   };
   $("btnDelTrailer").onclick=()=>{
     const t=state.trailers.find(x=>x.id===selectedTrailerId);
@@ -725,9 +727,26 @@ function bindBackup(){
 
 function bindSaveButtons(){
   const btnTruck=$("btnSaveTruck");
-  if(btnTruck) btnTruck.onclick=()=>{ clearTruckDirty(); renderResults(); activateTab("tab-results"); };
+  if(btnTruck) btnTruck.onclick=()=>{
+    renderLists();
+    renderTruckForm();
+    syncTripSelectors();
+    renderResults();
+    clearTruckDirty();
+    activateTab("tab-trucks");
+    scrollTopNow();
+  };
   const btnTrailer=$("btnSaveTrailer");
-  if(btnTrailer) btnTrailer.onclick=()=>{ clearTrailerDirty(); renderResults(); activateTab("tab-results"); };
+  if(btnTrailer) btnTrailer.onclick=()=>{
+    renderLists();
+    renderTrailerForm();
+    syncTripSelectors();
+    updateTrailerComputed();
+    renderResults();
+    clearTrailerDirty();
+    activateTab("tab-trailers");
+    scrollTopNow();
+  };
 }
 
 function bindCalculate(){
@@ -737,6 +756,7 @@ function bindCalculate(){
     clearTripDirty();
     renderResults();
     activateTab("tab-results");
+    scrollTopNow();
   };
 }
 
@@ -755,6 +775,7 @@ function boot(rerender=false){
   clearTruckDirty();
   clearTrailerDirty();
   clearTripDirty();
+  bindNumericFieldUx();
 
   if(rerender) return;
 
@@ -766,6 +787,7 @@ function boot(rerender=false){
   bindSaveButtons();
   bindCrud();
   bindBackup();
+  bindNumericFieldUx();
 
   if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(()=>{});
