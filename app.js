@@ -644,16 +644,17 @@ const wrap=$("resultsSummary"); wrap.innerHTML="";
   cards.forEach(c=>{
     const div=document.createElement("div");
     const klass=pillClass(c.ok,c.util);
-    div.className="card kpi results-kpi-card";
-    div.innerHTML=`<div class="label results-kpi-label">${escapeHtml(c.title)}</div><div class="value results-kpi-value">${escapeHtml(c.value)}</div><div class="sub results-kpi-sub">${escapeHtml(c.sub)}</div><div class="pill ${klass} results-kpi-pill">${klass==="ok"?"OK":(klass==="warn"?"CAUTION":"OVER LIMIT")}</div>`;
+    div.className="card kpi";
+    div.innerHTML=`<div class="label">${escapeHtml(c.title)}</div><div class="value">${escapeHtml(c.value)}</div><div class="sub">${escapeHtml(c.sub)}</div><div class="pill ${klass}">${klass==="ok"?"OK":(klass==="warn"?"CAUTION":"OVER LIMIT")}</div>`;
     wrap.appendChild(div);
   });
 
     
 $("resultsDetails").innerHTML=`
-  <div class="card results-detail-card"><div class="label muted small results-detail-label">Selected</div><div class="results-detail-body"><b>${escapeHtml(r.truck.name||"Truck")}</b> towing <b>${escapeHtml(r.tr.name||"Trailer")}</b></div></div>
-  <div class="card results-detail-card"><div class="label muted small results-detail-label">Load breakdown</div>
-    <div class="results-detail-body"><div class="muted small">Truck loads: ${fmtLb(r.truckLoadTotal)}</div><div class="muted small">Trailer loads: ${fmtLb(r.trailerLoadTotalLbs)}</div></div>
+  <div class="card"><div class="label muted small">Selected</div><div><b>${escapeHtml(r.truck.name||"Truck")}</b> towing <b>${escapeHtml(r.tr.name||"Trailer")}</b></div></div>
+  <div class="card"><div class="label muted small">Load breakdown</div>
+    <div class="muted small">Truck loads: ${fmtLb(r.truckLoadTotal)}</div>
+    <div class="muted small">Trailer loads: ${fmtLb(r.trailerLoadTotalLbs)}</div>
   </div>
 `;
 
