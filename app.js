@@ -219,6 +219,17 @@ function pillClass(ok, util){
 let selectedTruckId=null, selectedTrailerId=null;
 function ensureSelections(){ if(!selectedTruckId&&state.trucks[0]) selectedTruckId=state.trucks[0].id; if(!selectedTrailerId&&state.trailers[0]) selectedTrailerId=state.trailers[0].id; }
 
+
+function bindNumericFieldUx(){
+  document.querySelectorAll('#tab-trip input[type="number"], #tab-trucks input[type="number"], #tab-trailers input[type="number"], #tab-settings input[type="number"]').forEach(el=>{
+    if(el.dataset.zeroUxBound==="1") return;
+    el.dataset.zeroUxBound="1";
+    el.addEventListener("focus", ()=>{
+      if(el.value==="0" || el.value==="0.0" || el.value==="0.00") el.value="";
+    });
+  });
+}
+
 async function initState(){
   const defaults=normalizeIds(await loadDefaultData());
   const loaded=loadState();
