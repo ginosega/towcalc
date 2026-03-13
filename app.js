@@ -93,6 +93,35 @@ function activateTab(tabId){
   document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active", p.id===tabId));
 }
 
+function scrollTopNow(){
+  try{
+    window.scrollTo({top:0,left:0,behavior:"auto"});
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }catch(_e){}
+}
+
+function scrollPanelTop(tabId){
+  const panel = tabId ? document.getElementById(tabId) : null;
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      scrollTopNow();
+      if(panel){
+        try{ panel.scrollIntoView({block:"start", inline:"nearest"}); }catch(_e){}
+      }
+      scrollTopNow();
+    });
+  });
+}
+
+function focusTextEnd(el){
+  if(!el) return;
+  el.focus();
+  const val = el.value || "";
+  try{ el.setSelectionRange(val.length, val.length); }catch(_e){}
+}
+
+
 
 function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
 function hydrate(s){
